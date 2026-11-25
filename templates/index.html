@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Skrip Anti-Flash Synchronous: Mencegah Hero Section sempat terlihat saat mendarat di anchor section -->
+  <script>
+    if (window.location.hash && window.location.hash !== '#beranda') {
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      document.documentElement.classList.add('hash-jumping');
+    }
+  </script>
+
+  <title>MusaVision: Deteksi Cerdas Patologi Daun Pisang (YOLO26n + CLAHE)</title>
+  <meta name="description" content="Platform kecerdasan buatan editorial untuk deteksi dini penyakit daun pisang berbasis arsitektur YOLO26 Nano, penajaman mikrokontras CIE-LAB CLAHE, Gatekeeper validasi citra, serta rekomendasi sanitasi dan fungisida standar FRAC." />
+
+  <!-- Favicon Tab Bar Daun Pisang Cerdas (Inline SVG Kotak Membulat Lime Solid) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23DDF247'/%3E%3Cpath d='M23.5 8.5C18 9 10.5 13.5 9 23C13.5 22.5 20.5 18.5 23.5 8.5Z' fill='%23111812'/%3E%3Cpath d='M9 23C12.5 18 17.5 13.5 23 8.8' stroke='%23DDF247' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E" />
+
+  <!-- Tipografi Editorial: Manrope, Instrument Serif, & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            alabaster: '#F6F7F4',
+            surface: '#FFFFFF',
+            forest: {
+              DEFAULT: '#163C24',
+              soft: '#1C382A',
+              dark: '#0F2A19'
+            },
+            botanical: {
+              DEFAULT: '#2F6B43',
+              hover: '#245434'
+            },
+            lime: {
+              agro: '#DDF247',
+              hover: '#CEE435'
+            },
+            charcoal: '#111812',
+            muted: '#4B524C',
+            subtle: '#E8EAE6'
+          },
+          fontFamily: {
+            sans: ['"Manrope"', 'system-ui', '-apple-system', 'sans-serif'],
+            serif: ['"Instrument Serif"', 'Georgia', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body class="bg-white text-[#111812] antialiased selection:bg-[#DDF247] selection:text-[#111812]">
+  <!-- Skrip Langsung: Mendarat instan pada anchor section saat berpindah halaman (tanpa hero & tanpa animasi) -->
+  <script>
+    (function() {
+      if (window.location.hash) {
+        try {
+          var target = document.querySelector(window.location.hash);
+          if (target) {
+            var top = target.getBoundingClientRect().top + window.pageYOffset - 88;
+            window.scrollTo({ top: top, behavior: 'instant' });
+          }
+        } catch(e){}
+      }
+    })();
+  </script>
+
+  <!-- Tombol dan jangkar kompatibilitas test runner -->
+  <div class="hidden" aria-hidden="true">
+    <button id="tab-btn-detect" type="button" onclick="switchView('home'); smoothScrollTo(document.getElementById('deteksi'));"></button>
+    <button id="tab-btn-history" type="button" onclick="switchWorkspaceTab('history'); smoothScrollTo(document.getElementById('deteksi'));"></button>
+    <button id="tab-btn-sus" type="button" onclick="smoothScrollTo(document.getElementById('faq-section'));"></button>
+    <div id="tab-detect"></div>
+    <div id="tab-history"></div>
+    <div id="tab-sus"></div>
+  </div>
+
+  <!-- 1. NAVBAR (Fixed mengambang di atas hero, glassmorphism saat scroll) -->
+  <header id="mainNavbar" class="navbar" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 50;">
+    <div class="navbar-container">
+      
+      <!-- Kiri: Logo Bersih (Kotak Membulat Lime Solid 32x32 + Wordmark 1 Baris) -->
+      <a href="/" class="nav-logo-link flex items-center gap-2.5 active:scale-95 transition-transform">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+          <rect width="32" height="32" rx="9" fill="#DDF247"/>
+          <path d="M23.5 8.5C18 9 10.5 13.5 9 23C13.5 22.5 20.5 18.5 23.5 8.5Z" fill="#111812"/>
+          <path d="M9 23C12.5 18 17.5 13.5 23 8.8" stroke="#DDF247" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="nav-brand-text font-sans font-medium text-[1.05rem] tracking-[-0.01em] text-white leading-none">MusaVision</span>
+      </a>
+
+      <!-- Tengah: Pill Kaca Transparan dengan 5 Menu Singkat (Sinkronisasi Scroll Otomatis) -->
+      <nav class="nav-center-pill" id="desktopNavPill">
+        <a href="#beranda" class="nav-item-link is-active" data-section="beranda" data-nav-key="beranda">
+          <span class="nav-dot-active"></span>
+          <span>Beranda</span>
+        </a>
+        <a href="#misi" class="nav-item-link" data-section="misi" data-nav-key="misi">Misi</a>
+        <a href="#keunggulan" class="nav-item-link" data-section="keunggulan" data-nav-key="keunggulan">Keunggulan</a>
+        <a href="#deteksi" class="nav-item-link" data-section="deteksi" data-nav-key="deteksi">Deteksi</a>
+        <a href="#performa" class="nav-item-link" data-section="performa" data-nav-key="performa">Performa</a>
+        <a href="#sanitasi" class="nav-item-link" data-section="sanitasi" data-nav-key="sanitasi">Sanitasi</a>
+        <a href="#katalog-preview" class="nav-item-link" data-section="katalog-preview" data-nav-key="katalog">Katalog</a>
+      </nav>
+
+      <!-- Kanan: Tombol Pill Putih Solid + Hamburger Mobile -->
+      <div class="flex items-center gap-2">
+        <a href="/deteksi" class="nav-cta-pill">
+          <span>Mulai Deteksi</span>
+        </a>
+
+        <button type="button" id="hamburgerBtn" onclick="toggleMobileMenu()" class="nav-ham-btn" aria-label="Menu" aria-expanded="false">
+          <span class="nav-ham-bar bar-1"></span>
+          <span class="nav-ham-bar bar-2"></span>
+          <span class="nav-ham-bar bar-3"></span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Mobile Full-Screen Navigation Overlay (100vw x 100dvh) -->
+  <div id="mobileMenuOverlay" class="mobile-menu-overlay" aria-hidden="true">
+    
+    <!-- Bagian Atas: Label & Daftar 7 Menu Utama -->
+    <div class="w-full">
+      <div class="mobile-nav-label">NAVIGASI</div>
+      <nav class="mobile-nav-list flex flex-col w-full gap-1">
+        <a href="#beranda" data-nav-key="beranda" onclick="handleNavClick('beranda', this, event)" class="mobile-nav-link is-active" style="--item-index: 0;">
+          <div class="flex items-center gap-3">
+            <span class="mobile-nav-dot"></span>
+            <span class="mobile-nav-text">Beranda</span>
+          </div>
+          <span class="mobile-nav-index">01</span>
+        </a>
+        <a href="#misi" data-nav-key="misi" onclick="handleNavClick('misi', this, event)" class="mobile-nav-link" style="--item-index: 1;">
+          <div class="flex items-center gap-3">
+            <span class="mobile-nav-dot"></span>
+            <span class="mobile-nav-text">Misi</span>
+          </div>
+          <span class="mobile-nav-index">02</span>
+        </a>
+        <a href="#keunggulan" data-nav-key="keunggulan" onclick="handleNavClick('keunggulan', this, event)" class="mobile-nav-link" style="--item-index: 2;">
+          <div class="flex items-center gap-3">
+            <span class="mobile-nav-dot"></span>
+            <span class="mobile-nav-text">Keunggulan</span>
+          </div>
+          <span class="mobile-nav-index">03</span>
+        </a>
+        <a href="#deteksi" data-nav-key="deteksi" onclick="handleNavClick('deteksi', this, event)" class="mobile-nav-link" style="--item-index: 3;">
+          <div class="flex items-center gap-3">
+            <span class="mobile-nav-dot"></span>
+            <span class="mobile-nav-text">Deteksi</span>
+          </div>
+          <span class="mobile-nav-index">04</span>
+        </a>
+        <a href="#performa" data-nav-key="performa" onclick="handleNavClick('performa', this, event)" class="mobile-nav-link" style="--item-index: 4;">
+          <div class="flex items-center gap-3">
+            <span class="mobile-nav-dot"></span>
+            <span class="mobile-nav-text">Performa</span>
+          </div>
+          <span class="mobile-nav-index">05</span>
+        </a>
+        <a href="#sanitasi" data-nav-key="sanitasi" onclick="handleNavClick('sanitasi', this, event)" class="mobile-nav-link" style="--item-index: 5;">
+          <div class="flex items-center gap-3">
+            <span class="mobile-nav-dot"></span>
+            <span class="mobile-nav-text">Sanitasi</span>
+          </div>
+          <span class="mobile-nav-index">06</span>
+        </a>
+        <a href="#katalog-preview" data-nav-key="katalog" onclick="handleNavClick('katalog', this, event)" class="mobile-nav-link" style="--item-index: 6;">
+          <div class="flex items-center gap-3">
+            <span class="mobile-nav-dot"></span>
+            <span class="mobile-nav-text">Katalog</span>
+          </div>
+          <span class="mobile-nav-index">07</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Area Bawah Overlay (Footer CTA Menu) -->
+    <div class="mobile-menu-cta-group border-t border-[rgba(17,24,18,0.08)] pt-5 mt-6 flex flex-col gap-2.5 w-full" style="--item-index: 7;">
+      <a href="/deteksi" onclick="toggleMobileMenu(true)" class="mobile-menu-btn-primary">
+        <span>Mulai Deteksi Sekarang</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="7" y1="17" x2="17" y2="7"></line>
+          <polyline points="7 7 17 7 17 17"></polyline>
+        </svg>
+      </a>
+      <a href="/katalog-patogen" onclick="toggleMobileMenu(true)" class="mobile-menu-btn-secondary">
+        <span>Buka Katalog Patogen</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- 2. CINEMATIC HERO SLIDESHOW (#beranda) -->
+  <section id="beranda" class="hero-editorial w-full h-screen h-[100dvh] md:h-screen relative overflow-hidden m-0 p-0 flex flex-col justify-between">
+    <!-- Auto-Crossfade Slideshow (3 Gambar Bebas Gap Putih) -->
+    <div class="hero-slideshow-container absolute inset-0 w-full h-full m-0 p-0 overflow-hidden pointer-events-none">
+      <div id="heroSlide0" class="hero-slide active w-full h-full absolute inset-0 m-0 p-0">
+        <img src="/static/samples/musavision_hero_bg.jpg" alt="MusaVision Hero Background" class="object-cover object-center w-full h-full block m-0 p-0" />
+      </div>
+      <div id="heroSlide1" class="hero-slide w-full h-full absolute inset-0 m-0 p-0">
+        <img src="/static/samples/pillar_canopy_management.jpg" alt="Manajemen Kanopi Kebun Pisang" class="object-cover object-center w-full h-full block m-0 p-0" />
+      </div>
+      <div id="heroSlide2" class="hero-slide w-full h-full absolute inset-0 m-0 p-0">
+        <img src="/static/samples/pillar_frac_spraying.jpg" alt="Penyemprotan Fungisida FRAC" class="object-cover object-center w-full h-full block m-0 p-0" />
+      </div>
+    </div>
+
+    <!-- Gradient Scrim Penjaga Keterbacaan Teks (Mobile Vertikal + Desktop Layered 90deg) -->
+    <div class="hero-scrim hero-overlay"></div>
+
+    <div class="hero-inner w-full flex-grow flex flex-col justify-between pt-20 sm:pt-28 lg:pt-36 pb-5 sm:pb-6">
+      
+      <!-- Blok Konten Hero (H1 + Subtitle + Dual CTA) dengan margin seimbang -->
+      <div class="hero-content-block">
+        <h1 id="heroHeadline" data-reveal="words" class="hero-title text-4xl sm:text-6xl lg:text-[72px] font-normal tracking-[-0.025em] text-white leading-[1.1] max-w-4xl">
+          <span class="block">Deteksi Cerdas untuk</span>
+          <span class="block mt-1 sm:mt-2">
+            <span>Kebun </span><span class="font-serif italic font-normal tracking-normal text-[#E2F0D9]">Pisang</span>
+          </span>
+        </h1>
+
+        <!-- Subheadline dalam bahasa petani yang lugas, tampil utuh tanpa terpotong -->
+        <p class="hero-subdesc hero-subtitle text-base sm:text-lg text-white/95 font-normal max-w-xl max-w-[55ch] mt-3 sm:mt-4 leading-relaxed">
+          Kenali bercak daun sejak dini, jaga 6-8 daun sehat, dan atur rotasi fungisida terstandar.
+        </p>
+
+        <!-- Dual CTA: Tombol Lime (#DDF247) + Tombol Outline Kaca -->
+        <div class="hero-cta-group mt-4 sm:mt-8">
+          <a href="/deteksi" class="hero-btn-lime">
+            <span>Mulai Deteksi</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </a>
+          <a href="#sanitasi" class="hero-btn-outline">
+            <span>Panduan Sanitasi</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Wrapper Bagian Bawah: Indikator Slide di Atas Garis + Bottom Bar 3 Item Sejajar -->
+      <div class="hero-bottom-wrapper w-full">
+        <!-- Indikator Slideshow Minimalis di Atas Garis Pemisah (Rata Kanan) -->
+        <div class="hero-slide-nav-top flex justify-end mb-2.5">
+          <div class="hero-pagination">
+            <span id="heroSlideCounter" class="hidden md:inline-block text-white/80 font-normal tracking-wider text-xs font-sans">01 / 03</span>
+            <div class="flex items-center gap-1.5" id="heroSlideDots">
+              <button type="button" onclick="goToHeroSlide(0)" class="hero-dot active" aria-label="Slide 1"></button>
+              <button type="button" onclick="goToHeroSlide(1)" class="hero-dot" aria-label="Slide 2"></button>
+              <button type="button" onclick="goToHeroSlide(2)" class="hero-dot" aria-label="Slide 3"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Bar: 3 Item Sejajar Persis Referensi Agrovia (Kiri - Tengah - Kanan) -->
+        <div class="hero-bottom-bar">
+          <!-- Kiri: Link Scroll -->
+          <a href="#misi" class="hero-bottom-scroll">
+            <span>SCROLL</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <polyline points="19 12 12 19 5 12"></polyline>
+            </svg>
+          </a>
+
+          <!-- Tengah: Metrik Akurasi Ilmiah -->
+          <div class="hero-bottom-metric-mid font-mono">
+            <span>85.34% mAP@50</span>
+          </div>
+
+          <!-- Kanan: Kelas Patologi -->
+          <div class="hero-bottom-metric-right font-mono">
+            <span>5 Kelas Patologi</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 3. STRIP STANDAR TEKNOLOGI MARQUEE & SECTION MISI (#misi) -->
+  <section class="tech-standards-bar">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-3 sm:gap-4 overflow-hidden">
+      <span class="text-sm sm:text-base font-semibold text-[#3E4640] tracking-normal whitespace-nowrap shrink-0">
+        Didukung standar teknologi &amp; agronomi:
+      </span>
+      <div class="tech-marquee-wrapper w-full">
+        <div class="tech-marquee-track">
+          <!-- Set 1 -->
+          <div class="tech-item"><span class="tech-item-dot"></span><span class="font-mono">YOLO26 Nano</span></div>
+          <span class="text-[#D2D6CE]">&middot;</span>
+          <div class="tech-item"><span class="tech-item-dot"></span><span class="font-mono">CIE-LAB CLAHE</span></div>
+          <span class="text-[#D2D6CE]">&middot;</span>
+          <div class="tech-item"><span class="tech-item-dot"></span><span>Gatekeeper Validasi</span></div>
+          <span class="text-[#D2D6CE]">&middot;</span>
+          <div class="tech-item"><span class="tech-item-dot"></span><span class="font-mono">Standar Kode FRAC</span></div>
+          <span class="text-[#D2D6CE]">&middot;</span>
+          <div class="tech-item"><span class="tech-item-dot"></span><span>Deleafing 6-8 Daun</span></div>
+          <span class="text-[#D2D6CE]">&middot;</span>
+          <!-- Set 2 (Seamless loop) -->
+          <div class="tech-item"><span class="tech-item-dot"></span><span class="font-mono">YOLO26 Nano</span></div>
+          <span class="text-[#D2D6CE]">&middot;</span>
+          <div class="tech-item"><span class="tech-item-dot"></span><span class="font-mono">CIE-LAB CLAHE</span></div>
+          <span class="text-[#D2D6CE]">&middot;</span>
+          <div class="tech-item"><span class="tech-item-dot"></span><span>Gatekeeper Validasi</span></div>
+          <span class="text-[#D2D6CE]">&middot;</span>
+          <div class="tech-item"><span class="tech-item-dot"></span><span class="font-mono">Standar Kode FRAC</span></div>
+          <span class="text-[#D2D6CE]">&middot;</span>
+          <div class="tech-item"><span class="tech-item-dot"></span><span>Deleafing 6-8 Daun</span></div>
+          <span class="text-[#D2D6CE]">&middot;</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Misi Section dengan Inline Photo Pill & Scrub Reveal Text (image_6.png) -->
+  <section id="misi" class="section-mission">
+    <div class="text-xs font-mono font-semibold uppercase tracking-wider text-[#2F6B43] mb-3">Misi MusaVision</div>
+
+    <h2 id="misiHeading" class="text-2xl sm:text-4xl lg:text-5xl font-medium tracking-tight leading-[1.3] text-[#4B524C]">
+      <span class="misi-scrub-text">Platform kami dibangun untuk mendampingi petani, penyuluh, dan pengelola kebun pisang dalam menjaga produktivitas lahan melalui instrumen</span>
+      <span class="inline-photo-pill">
+        <img src="/static/samples/sample_fresh.jpg" alt="Helai Daun Pisang Sehat" />
+      </span>
+      <span class="misi-scrub-text">skrining dini bercak daun yang praktis, cepat, dan terpercaya di lapangan.</span>
+    </h2>
+  </section>
+
+  <!-- 4. KEUNGGULAN SISTEM: ACCORDION + FOTO (#keunggulan) -->
+  <section id="keunggulan" class="section-keunggulan">
+    <div class="keunggulan-container">
+      
+      <!-- Header 2 Kolom -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end mb-12">
+        <div class="md:col-span-7">
+          <div class="text-xs font-mono font-semibold uppercase tracking-wider text-[#2F6B43] mb-3">Keunggulan Sistem</div>
+          <h2 data-reveal="words" class="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#111812] leading-[1.15]">
+            <span class="block">Solusi Deteksi Cerdas</span>
+            <span class="font-serif italic font-normal text-[#2F6B43] block mt-1">yang Memberikan Hasil Nyata.</span>
+          </h2>
+        </div>
+        <div class="md:col-span-5">
+          <p class="text-sm sm:text-base text-[#37413A] leading-relaxed">
+            Kombinasi model visi komputer ringan dan pengetahuan agronomi terpadu untuk memandu petani mengambil keputusan perlindungan tanaman yang tepat.
+          </p>
+        </div>
+      </div>
+
+      <!-- 2 Kolom: Kiri Accordion, Kanan Foto Berubah -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Kolom Accordion (lg:col-span-6) -->
+        <div class="lg:col-span-6 space-y-3">
+          
+          <!-- Item 1 (Default Aktif: Intelligent Canopy) -->
+          <div class="keunggulan-accordion-item accordion-item is-active" data-index="0">
+            <button type="button" class="accordion-trigger" aria-expanded="true">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="keunggulan-feature-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                  </svg>
+                </div>
+                <span class="accordion-title">Manajemen Kanopi Daun &amp; Fotosintesis (Intelligent Canopy)</span>
+              </div>
+              <div class="accordion-icon-box" aria-hidden="true">
+                <svg class="icon-plus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <svg class="icon-minus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </div>
+            </button>
+            <div class="accordion-panel">
+              <div class="accordion-clip">
+                <div class="accordion-body-inner">
+                  <p class="accordion-desc">Menganalisis keseimbangan helai daun aktif pada rumpun pisang untuk mempertahankan 6 sampai 8 daun fungsional sehat, memaksimalkan laju asimilasi fotosintesis selama fase pengisian tandan buah hingga panen optimal.</p>
+                  <!-- Gambar Nested di Dalam Collapsible (Khusus Layar Mobile: image_8.png) -->
+                  <div class="accordion-mobile-img-box">
+                    <img src="/static/samples/pillar_canopy_management.jpg" alt="Manajemen Kanopi Daun Pisang" class="accordion-mobile-img" loading="lazy" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Item 2: Standard Technology -->
+          <div class="keunggulan-accordion-item accordion-item" data-index="1">
+            <button type="button" class="accordion-trigger" aria-expanded="false">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="keunggulan-feature-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                  </svg>
+                </div>
+                <span class="accordion-title">Standar Teknologi YOLO26n &amp; CIE-LAB CLAHE</span>
+              </div>
+              <div class="accordion-icon-box" aria-hidden="true">
+                <svg class="icon-plus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <svg class="icon-minus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </div>
+            </button>
+            <div class="accordion-panel">
+              <div class="accordion-clip">
+                <div class="accordion-body-inner">
+                  <p class="accordion-desc">Model neural network 2,39 juta parameter dengan adaptasi kontras ruang warna CIE-LAB pada kanal kecerahan (L), menonjolkan batas lesi mikroskopis tanpa terganggu saturasi sinar matahari terik lapangan.</p>
+                  <!-- Gambar Nested di Dalam Collapsible (Khusus Layar Mobile: image_8.png) -->
+                  <div class="accordion-mobile-img-box">
+                    <img src="/static/samples/musavision_hero_bg.jpg" alt="Standar Teknologi MusaVision" class="accordion-mobile-img" loading="lazy" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Item 3: Disease Deteksi -->
+          <div class="keunggulan-accordion-item accordion-item" data-index="2">
+            <button type="button" class="accordion-trigger" aria-expanded="false">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="keunggulan-feature-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                    <path d="m9 12 2 2 4-4"></path>
+                  </svg>
+                </div>
+                <span class="accordion-title">Gatekeeper &amp; Deteksi Dini Penyakit Daun</span>
+              </div>
+              <div class="accordion-icon-box" aria-hidden="true">
+                <svg class="icon-plus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <svg class="icon-minus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </div>
+            </button>
+            <div class="accordion-panel">
+              <div class="accordion-clip">
+                <div class="accordion-body-inner">
+                  <p class="accordion-desc">Filter validasi citra berbasis heuristik klorofil yang otomatis menyaring objek non-daun, dilanjutkan deteksi lesi Sigatoka Hitam, Sigatoka Kuning, Cordana, dan Pestalotiopsis secara presisi.</p>
+                  <!-- Gambar Nested di Dalam Collapsible (Khusus Layar Mobile: image_8.png) -->
+                  <div class="accordion-mobile-img-box">
+                    <img src="/static/samples/pillar_sanitation_deleafing.jpg" alt="Deteksi Penyakit Daun Pisang" class="accordion-mobile-img" loading="lazy" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Item 4: Frac Spraying -->
+          <div class="keunggulan-accordion-item accordion-item" data-index="3">
+            <button type="button" class="accordion-trigger" aria-expanded="false">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="keunggulan-feature-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  </svg>
+                </div>
+                <span class="accordion-title">Panduan Sanitasi Deleafing &amp; Rotasi FRAC Spraying</span>
+              </div>
+              <div class="accordion-icon-box" aria-hidden="true">
+                <svg class="icon-plus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <svg class="icon-minus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </div>
+            </button>
+            <div class="accordion-panel">
+              <div class="accordion-clip">
+                <div class="accordion-body-inner">
+                  <p class="accordion-desc">Rekomendasi sanitasi mekanis pemangkasan helai daun terinfeksi dan jadwal penyemprotan bahan aktif berstandar FRAC (DMI Triazol, Strobilurin, Mancozeb) untuk mencegah resistensi jamur patogen.</p>
+                  <!-- Gambar Nested di Dalam Collapsible (Khusus Layar Mobile: image_8.png) -->
+                  <div class="accordion-mobile-img-box">
+                    <img src="/static/samples/pillar_frac_spraying.jpg" alt="Rotasi FRAC Spraying" class="accordion-mobile-img" loading="lazy" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Kolom Kanan: Foto Berubah Sesuai Accordion Aktif (Khusus Layar Desktop: hidden lg:block) -->
+        <div class="hidden lg:block lg:col-span-6 sticky top-24">
+          <div class="keunggulan-photo-box rounded-3xl overflow-hidden border border-[#E8ECE6] shadow-sm aspect-[4/3] bg-slate-100">
+            <img id="keunggulanPhoto" src="/static/samples/pillar_canopy_management.jpg" alt="Keunggulan MusaVision" class="w-full h-full object-cover transition-opacity duration-300" />
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 5. ALUR DETEKSI AI DAUN PISANG (#deteksi) -->
+  <section id="deteksi" class="section-preview-deteksi">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      
+      <!-- Header 2 Kolom -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end mb-12">
+        <div class="md:col-span-7">
+          <div class="text-xs font-mono font-semibold uppercase tracking-wider text-[#2F6B43] mb-3">Alur Deteksi AI</div>
+          <h2 data-reveal="words" class="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#111812] leading-[1.15]">
+            <span class="block">Deteksi Penyakit Lebih</span>
+            <span class="font-serif italic font-normal text-[#2F6B43] block mt-1">Cepat, Akurat &amp; Terstandar.</span>
+          </h2>
+        </div>
+        <div class="md:col-span-5 flex flex-col justify-end">
+          <p class="text-sm sm:text-base text-[#424A44] leading-relaxed mb-4">
+            Unggah foto daun pisang Anda untuk memvalidasi gejala penyakit, mengukur keparahan kanopi, dan memperoleh rekomendasi sanitasi serta fungisida FRAC dalam hitungan detik.
+          </p>
+          <div>
+            <a href="/deteksi" class="btn-forest-cta inline-flex items-center gap-2">
+              <span>Buka Workspace Deteksi</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid 3 Langkah Alur Deteksi (Horizontal di Desktop, Bertumpuk di Mobile) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        
+        <!-- Langkah 1 -->
+        <div class="deteksi-step-card">
+          <div class="flex items-center justify-between mb-5">
+            <span class="deteksi-step-num">01</span>
+            <span class="text-[11px] font-mono font-semibold text-[#2F6B43] uppercase tracking-wider bg-[#F0F4ED] px-2.5 py-1 rounded-full">Akuisisi Citra</span>
+          </div>
+          <h3 class="text-lg font-bold text-[#111812] mb-2.5">Potret atau Unggah Daun</h3>
+          <p class="text-xs sm:text-sm text-[#4B524C] leading-relaxed">
+            Ambil foto helai daun pisang langsung di kebun atau unggah berkas (JPG/PNG/WEBP). Sistem mendukung tangkapan kamera belakang perangkat mobile secara responsif.
+          </p>
+        </div>
+
+        <!-- Langkah 2 -->
+        <div class="deteksi-step-card">
+          <div class="flex items-center justify-between mb-5">
+            <span class="deteksi-step-num">02</span>
+            <span class="text-[11px] font-mono font-semibold text-[#2F6B43] uppercase tracking-wider bg-[#F0F4ED] px-2.5 py-1 rounded-full">Inferensi YOLO26n</span>
+          </div>
+          <h3 class="text-lg font-bold text-[#111812] mb-2.5">Validasi &amp; Analisis AI</h3>
+          <p class="text-xs sm:text-sm text-[#4B524C] leading-relaxed">
+            Gatekeeper memvalidasi objek agar non-pisang tertolak, penajaman CIE-LAB CLAHE menonjolkan lesi mikro, dan arsitektur YOLO26n mendeteksi 5 kondisi patologi seketika.
+          </p>
+        </div>
+
+        <!-- Langkah 3 -->
+        <div class="deteksi-step-card">
+          <div class="flex items-center justify-between mb-5">
+            <span class="deteksi-step-num">03</span>
+            <span class="text-[11px] font-mono font-semibold text-[#2F6B43] uppercase tracking-wider bg-[#F0F4ED] px-2.5 py-1 rounded-full">Tindakan Lapang</span>
+          </div>
+          <h3 class="text-lg font-bold text-[#111812] mb-2.5">Protokol Sanitasi &amp; FRAC</h3>
+          <p class="text-xs sm:text-sm text-[#4B524C] leading-relaxed">
+            Dapatkan taksiran keparahan kanopi fungsional, rekomendasi pemangkasan mekanis (deleafing), serta kode rotasi bahan aktif fungisida anti-resistensi.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Strip Ringkasan Kapabilitas & CTA Cepat -->
+      <div class="deteksi-strip-bar">
+        <!-- 3 Poin Fitur Editorial Manrope -->
+        <div class="deteksi-strip-features">
+          <span class="deteksi-feature-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1E4D2B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Format JPG, PNG, WEBP</span>
+          </span>
+          <span class="deteksi-feature-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1E4D2B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Kamera Belakang Langsung</span>
+          </span>
+          <span class="deteksi-feature-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1E4D2B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Riwayat Offline IndexedDB</span>
+          </span>
+        </div>
+
+        <!-- Kelompok Tombol CTA (Di Mobile: Garis Pemisah Tipis + Utama di Atas, Sekunder di Bawah) -->
+        <div class="deteksi-strip-actions">
+          <a href="/deteksi" class="deteksi-cta-primary">
+            <span>Mulai Deteksi Sekarang</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </a>
+          <a href="/katalog-patogen" class="deteksi-cta-secondary">
+            <span>Lihat 5 Kelas Patogen</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 5. VALIDASI & PERFORMA SISTEM (#performa) -->
+  <section id="performa" class="section-performa">
+    <div class="max-w-6xl mx-auto">
+      
+      <!-- Header 2 Kolom -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end mb-12">
+        <div class="md:col-span-7">
+          <div class="text-xs font-mono font-semibold uppercase tracking-wider text-[#2F6B43] mb-3">Validasi &amp; Standar</div>
+          <h2 data-reveal="words" class="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#111812] leading-[1.15]">
+            <span class="block">Terukur Secara Ilmiah,</span>
+            <span class="font-serif italic font-normal text-[#2F6B43] block mt-1">Siap untuk Lapangan.</span>
+          </h2>
+        </div>
+        <div class="md:col-span-5">
+          <p class="text-sm sm:text-base text-[#424A44] leading-relaxed">
+            Performa model visi komputer, pengujian usabilitas pengguna, dan standar agronomi kebun yang mendasari sistem MusaVision.
+          </p>
+        </div>
+      </div>
+
+      <!-- Grid 4 Metrik Editorial (Zero Nested Cards) -->
+      <div class="performa-metrics-grid">
+        <div class="performa-metric-col">
+          <div class="performa-metric-val">84.0</div>
+          <div class="performa-metric-title">Skor SUS</div>
+          <div class="performa-metric-sub">Kategori Excellent (Brooke)</div>
+        </div>
+
+        <div class="performa-metric-col">
+          <div class="performa-metric-val">85.34%</div>
+          <div class="performa-metric-title">Akurasi mAP@50</div>
+          <div class="performa-metric-sub">Lokalisasi YOLO26 Nano</div>
+        </div>
+
+        <div class="performa-metric-col">
+          <div class="performa-metric-val">5 Kelas</div>
+          <div class="performa-metric-title">Kondisi Daun</div>
+          <div class="performa-metric-sub">Fresh &amp; 4 Jamur Patogen</div>
+        </div>
+
+        <div class="performa-metric-col">
+          <div class="performa-metric-val">6-8 Daun</div>
+          <div class="performa-metric-title">Standar Deleafing</div>
+          <div class="performa-metric-sub">Menjaga Bobot Panen Tandan</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+    </div>
+  </section>
+
+  <!-- 6. 3 PILAR TINDAKAN SANITASI KEBUN (#sanitasi) -->
+  <section id="sanitasi" class="section-sanitasi">
+    <div class="max-w-6xl mx-auto">
+      
+      <!-- Header 2 Kolom -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end mb-12">
+        <div class="md:col-span-7">
+          <div class="text-xs font-mono font-semibold uppercase tracking-wider text-[#2F6B43] mb-3">3 Pilar Sanitasi</div>
+          <h2 data-reveal="words" class="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#111812] leading-[1.15]">
+            <span class="block">Tindakan Sanitasi &amp;</span>
+            <span class="font-serif italic font-normal text-[#2F6B43] block mt-1">Pengendalian Berkelanjutan.</span>
+          </h2>
+        </div>
+        <div class="md:col-span-5">
+          <p class="text-sm sm:text-base text-[#37413A] leading-relaxed">
+            Tiga pilar intervensi terpadu untuk memutus siklus inokulum jamur patogen, mempertahankan fotosintesis optimal, dan mencegah resistensi fungisida.
+          </p>
+        </div>
+      </div>
+
+      <!-- 3 Kartu Foto Bersudut Bulat -->
+      <div class="pillar-grid-3">
+        
+        <!-- Pilar 1: Deleafing -->
+        <div class="pillar-editorial-card">
+          <div class="pillar-img-box">
+            <img src="/static/samples/pillar_sanitation_deleafing.jpg" alt="Pemangkasan Sanitasi Deleafing" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div>
+              <span class="text-xs font-mono text-[#2F6B43] font-semibold uppercase tracking-wider block mb-1">Pilar 1 &middot; <span class="font-serif italic font-normal text-sm lowercase">mekanis</span></span>
+              <h3 class="text-base sm:text-lg font-bold text-[#111812] leading-tight mb-2">Pemangkasan Sanitasi (Deleafing)</h3>
+              <p class="text-sm sm:text-base text-[#37413A] leading-relaxed">
+                Memangkas bagian helai daun nekrotik dengan pisau bersih sambil mempertahankan minimal 6 sampai 8 daun fungsional sehat per pohon pada fase pengisian buah.
+              </p>
+            </div>
+            <div class="pt-4 border-t border-[#E8EAE6] mt-4 flex items-center justify-between text-xs sm:text-sm text-[#4B524C] font-mono">
+              <span>Protokol Kebun</span>
+              <span class="text-[#2F6B43] font-semibold">&bull; Deleafing Mingguan</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pilar 2: Rotasi FRAC -->
+        <div class="pillar-editorial-card">
+          <div class="pillar-img-box">
+            <img src="/static/samples/pillar_frac_spraying.jpg" alt="Rotasi Fungisida Standar Kode FRAC" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div>
+              <span class="text-xs font-mono text-[#2F6B43] font-semibold uppercase tracking-wider block mb-1">Pilar 2 &middot; <span class="font-serif italic font-normal text-sm lowercase">kimiawi terukur</span></span>
+              <h3 class="text-base sm:text-lg font-bold text-[#111812] leading-tight mb-2">Rotasi Fungisida Kode FRAC</h3>
+              <p class="text-sm sm:text-base text-[#37413A] leading-relaxed">
+                Membedakan fungisida sistemik kuratif (FRAC 3 Triazol &amp; FRAC 11 Strobilurin) untuk Sigatoka dan kontak protektif ekonomis (FRAC M03/M05) untuk Cordana/Pestalotiopsis.
+              </p>
+            </div>
+            <div class="pt-4 border-t border-[#E8EAE6] mt-4 flex items-center justify-between text-xs sm:text-sm text-[#4B524C] font-mono">
+              <span>Rotasi Bahan Aktif</span>
+              <span class="text-[#2F6B43] font-semibold">&bull; Maks. 2x Aplikasi</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pilar 3: Manajemen Kanopi -->
+        <div class="pillar-editorial-card">
+          <div class="pillar-img-box">
+            <img src="/static/samples/pillar_canopy_management.jpg" alt="Manajemen Kanopi dan Drainase Lahan" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div>
+              <span class="text-xs font-mono text-[#2F6B43] font-semibold uppercase tracking-wider block mb-1">Pilar 3 &middot; <span class="font-serif italic font-normal text-sm lowercase">kultur teknis</span></span>
+              <h3 class="text-base sm:text-lg font-bold text-[#111812] leading-tight mb-2">Manajemen Kanopi &amp; Drainase</h3>
+              <p class="text-sm sm:text-base text-[#37413A] leading-relaxed">
+                Mengatur sirkulasi udara melalui jarak tanam teratur, penyiangan anakan pisang berlebih, serta pembuatan saluran drainase kebun untuk menekan kelembapan mikro kanopi.
+              </p>
+            </div>
+            <div class="pt-4 border-t border-[#E8EAE6] mt-4 flex items-center justify-between text-xs sm:text-sm text-[#4B524C] font-mono">
+              <span>Kelembapan Kanopi</span>
+              <span class="text-[#2F6B43] font-semibold">&bull; Aerasi Maksimal</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 7. HIGHLIGHT KATALOG PATOGEN (#katalog-preview) -->
+  <section id="katalog-preview" class="section-katalog-preview">
+    <div class="max-w-6xl mx-auto">
+      
+      <!-- Header 2 Kolom (Gaya Agrovia) -->
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10 pb-6 border-b border-[#E6E6E2]">
+        <div>
+          <div class="text-xs font-mono font-semibold uppercase tracking-wider text-[#2F6B43] mb-3">Katalog 5 Kondisi Daun</div>
+          <h2 data-reveal="words" class="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#111812] leading-[1.12]">
+            <span class="block">Kenali 5 Kondisi</span>
+            <span class="font-serif italic font-normal text-[#163C24] block mt-1">Daun Pisang.</span>
+          </h2>
+        </div>
+
+        <div class="flex flex-col items-start gap-4 max-w-[440px]">
+          <p class="text-sm sm:text-base text-[#37413A] leading-relaxed">
+            Identifikasi visual 5 kelas dataset daun pisang untuk pencegahan dini kerugian panen dan panduan tindakan agronomi kebun.
+          </p>
+          <a href="/katalog-patogen" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#163C24] hover:bg-[#0F2A19] text-white text-xs sm:text-sm font-semibold shadow-xs transition duration-200">
+            <span>Buka Katalog Lengkap</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- 5 Kartu Visual Editorial Bersih (Tanpa Badge Pastel) -->
+      <div class="katalog-preview-carousel">
+        
+        <!-- Kartu 01: Sigatoka Hitam -->
+        <a href="/katalog-patogen?kelas=black-sigatoka" class="katalog-preview-item group block bg-white rounded-2xl p-3 border border-[#E6E6E2] hover:border-[#163C24] transition duration-200 shadow-2xs">
+          <div class="aspect-[4/3] rounded-xl overflow-hidden bg-[#F6F7F4] border border-[#E6E6E2]">
+            <img src="/static/samples/sample_black_sigatoka.jpg" alt="Sigatoka Hitam" class="w-full h-full object-cover transition duration-300" loading="lazy" />
+          </div>
+          <div class="mt-3.5 px-1 pb-1">
+            <span class="font-mono text-xs sm:text-sm text-[#4B524C] block mb-0.5">01</span>
+            <h3 class="text-base font-bold text-[#111812] group-hover:text-[#163C24] transition leading-snug">Sigatoka Hitam</h3>
+            <p class="text-sm font-serif italic text-[#4B524C] mt-0.5">Pseudocercospora fijiensis</p>
+            <p class="text-xs sm:text-sm text-[#4B524C] mt-2.5 pt-2 border-t border-[#F0F2ED] font-mono">Tingkat Risiko: Tinggi</p>
+          </div>
+        </a>
+
+        <!-- Kartu 02: Sigatoka Kuning -->
+        <a href="/katalog-patogen?kelas=yellow-sigatoka" class="katalog-preview-item group block bg-white rounded-2xl p-3 border border-[#E6E6E2] hover:border-[#163C24] transition duration-200 shadow-2xs">
+          <div class="aspect-[4/3] rounded-xl overflow-hidden bg-[#F6F7F4] border border-[#E6E6E2]">
+            <img src="/static/samples/sample_yellow_sigatoka.jpg" alt="Sigatoka Kuning" class="w-full h-full object-cover transition duration-300" loading="lazy" />
+          </div>
+          <div class="mt-3.5 px-1 pb-1">
+            <span class="font-mono text-xs sm:text-sm text-[#4B524C] block mb-0.5">02</span>
+            <h3 class="text-base font-bold text-[#111812] group-hover:text-[#163C24] transition leading-snug">Sigatoka Kuning</h3>
+            <p class="text-sm font-serif italic text-[#4B524C] mt-0.5">Pseudocercospora musae</p>
+            <p class="text-xs sm:text-sm text-[#4B524C] mt-2.5 pt-2 border-t border-[#F0F2ED] font-mono">Tingkat Risiko: Moderat</p>
+          </div>
+        </a>
+
+        <!-- Kartu 03: Bercak Cordana -->
+        <a href="/katalog-patogen?kelas=cordana" class="katalog-preview-item group block bg-white rounded-2xl p-3 border border-[#E6E6E2] hover:border-[#163C24] transition duration-200 shadow-2xs">
+          <div class="aspect-[4/3] rounded-xl overflow-hidden bg-[#F6F7F4] border border-[#E6E6E2]">
+            <img src="/static/samples/sample_cordana.jpg" alt="Bercak Cordana" class="w-full h-full object-cover transition duration-300" loading="lazy" />
+          </div>
+          <div class="mt-3.5 px-1 pb-1">
+            <span class="font-mono text-xs sm:text-sm text-[#4B524C] block mb-0.5">03</span>
+            <h3 class="text-base font-bold text-[#111812] group-hover:text-[#163C24] transition leading-snug">Bercak Cordana</h3>
+            <p class="text-sm font-serif italic text-[#4B524C] mt-0.5">Cordana musae</p>
+            <p class="text-xs sm:text-sm text-[#4B524C] mt-2.5 pt-2 border-t border-[#F0F2ED] font-mono">Tingkat Risiko: Sekunder</p>
+          </div>
+        </a>
+
+        <!-- Kartu 04: Pestalotiopsis -->
+        <a href="/katalog-patogen?kelas=pestalotiopsis" class="katalog-preview-item group block bg-white rounded-2xl p-3 border border-[#E6E6E2] hover:border-[#163C24] transition duration-200 shadow-2xs">
+          <div class="aspect-[4/3] rounded-xl overflow-hidden bg-[#F6F7F4] border border-[#E6E6E2]">
+            <img src="/static/samples/sample_pestalotiopsis.jpg" alt="Pestalotiopsis" class="w-full h-full object-cover transition duration-300" loading="lazy" />
+          </div>
+          <div class="mt-3.5 px-1 pb-1">
+            <span class="font-mono text-xs sm:text-sm text-[#4B524C] block mb-0.5">04</span>
+            <h3 class="text-base font-bold text-[#111812] group-hover:text-[#163C24] transition leading-snug">Pestalotiopsis</h3>
+            <p class="text-sm font-serif italic text-[#4B524C] mt-0.5">Pestalotiopsis spp.</p>
+            <p class="text-xs sm:text-sm text-[#4B524C] mt-2.5 pt-2 border-t border-[#F0F2ED] font-mono">Tingkat Risiko: Tepi Daun</p>
+          </div>
+        </a>
+
+        <!-- Kartu 05: Daun Sehat -->
+        <a href="/katalog-patogen?kelas=fresh" class="katalog-preview-item group block bg-white rounded-2xl p-3 border border-[#E6E6E2] hover:border-[#163C24] transition duration-200 shadow-2xs">
+          <div class="aspect-[4/3] rounded-xl overflow-hidden bg-[#F6F7F4] border border-[#E6E6E2]">
+            <img src="/static/samples/sample_fresh.jpg" alt="Daun Sehat" class="w-full h-full object-cover transition duration-300" loading="lazy" />
+          </div>
+          <div class="mt-3.5 px-1 pb-1">
+            <span class="font-mono text-xs sm:text-sm text-[#4B524C] block mb-0.5">05</span>
+            <h3 class="text-base font-bold text-[#111812] group-hover:text-[#163C24] transition leading-snug">Daun Sehat</h3>
+            <p class="text-sm font-serif italic text-[#4B524C] mt-0.5">Musa spp.</p>
+            <p class="text-xs sm:text-sm text-[#2F6B43] mt-2.5 pt-2 border-t border-[#F0F2ED] font-mono font-medium">Kondisi: Optimal Sehat</p>
+          </div>
+        </a>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 8. FAQ ACCORDION INTERAKTIF (#faq-section) -->
+  <section id="faq-section" class="section-faq">
+    <div class="faq-max">
+      
+      <div class="text-center mb-8">
+        <div class="text-xs font-mono font-semibold uppercase tracking-wider text-[#2F6B43] mb-2.5">Pertanyaan Petani (FAQ)</div>
+        <h2 data-reveal="words" class="text-3xl sm:text-4xl font-semibold tracking-tight text-[#111812]">
+          <span>Pertanyaan Umum</span>
+          <span class="font-serif italic font-normal text-[#2F6B43]">Petani.</span>
+        </h2>
+        <p class="faq-subtitle text-sm sm:text-base text-[#37413A] mt-2 max-w-[60ch] mx-auto">
+          Jawaban praktis seputar validasi deteksi daun pisang dan penerapan sanitasi agronomi.
+        </p>
+      </div>
+
+      <!-- 5 FAQ Accordion Items -->
+      <div class="space-y-2.5">
+        
+        <div class="faq-card-item accordion-item">
+          <button type="button" class="accordion-trigger faq-trigger-btn" aria-expanded="false">
+            <span class="accordion-title">Mengapa foto manusia, pot, atau daun lain ditolak oleh sistem?</span>
+            <div class="accordion-icon-box" aria-hidden="true">
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9l6 6 6-6"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="accordion-panel faq-expandable-content">
+            <div class="accordion-clip">
+              <div class="accordion-body-inner faq-expandable-inner">
+                <p class="accordion-desc max-w-[68ch]">MusaVision dilengkapi modul Gatekeeper berlapis yang memeriksa proporsi klorofil daun pisang, mendeteksi wajah atau siluet manusia, dan memverifikasi integritas lamina daun pisang (Musa spp.). Ini mencegah model memberikan vonis keliru pada objek yang bukan helai daun pisang kebun.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-card-item accordion-item">
+          <button type="button" class="accordion-trigger faq-trigger-btn" aria-expanded="false">
+            <span class="accordion-title">Apa peran penajaman CIE-LAB CLAHE pada deteksi penyakit daun?</span>
+            <div class="accordion-icon-box" aria-hidden="true">
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9l6 6 6-6"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="accordion-panel faq-expandable-content">
+            <div class="accordion-clip">
+              <div class="accordion-body-inner faq-expandable-inner">
+                <p class="accordion-desc max-w-[68ch]">Di kebun terbuka, intensitas sinar matahari dan bayangan kanopi sering membuat bercak tipis Sigatoka tersamar. CIE-LAB CLAHE meningkatkan kontras lokal murni pada kanal kecerahan (L) tanpa mengubah rona warna alami daun, sehingga pola lesi mikro dapat dikenali lebih tajam oleh YOLO26 Nano.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-card-item accordion-item">
+          <button type="button" class="accordion-trigger faq-trigger-btn" aria-expanded="false">
+            <span class="accordion-title">Mengapa kita wajib mempertahankan minimal 6 sampai 8 daun sehat?</span>
+            <div class="accordion-icon-box" aria-hidden="true">
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9l6 6 6-6"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="accordion-panel faq-expandable-content">
+            <div class="accordion-clip">
+              <div class="accordion-body-inner faq-expandable-inner">
+                <p class="accordion-desc max-w-[68ch]">Tanaman pisang membutuhkan energi fotosintesis yang stabil sejak fase muncul bunga hingga pengisian buah. Jika jumlah daun fungsional sehat kurang dari 6 helai, tandan pisang tidak terisi penuh, berat tandan anjlok, dan buah berisiko matang dini sebelum sempat dipanen.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-card-item accordion-item">
+          <button type="button" class="accordion-trigger faq-trigger-btn" aria-expanded="false">
+            <span class="accordion-title">Apa itu kode FRAC dan mengapa harus dilakukan rotasi fungisida?</span>
+            <div class="accordion-icon-box" aria-hidden="true">
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9l6 6 6-6"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="accordion-panel faq-expandable-content">
+            <div class="accordion-clip">
+              <div class="accordion-body-inner faq-expandable-inner">
+                <p class="accordion-desc max-w-[68ch]">FRAC (Fungicide Resistance Action Committee) mengelompokkan bahan aktif berdasarkan mekanisme kerjanya pada jamur. Menyemprotkan fungisida dari golongan yang sama secara terus-menerus akan memicu mutasi resistensi jamur. Rotasi antar-kode FRAC (seperti Triazol FRAC 3 dengan Strobilurin FRAC 11 dan Kontak Multisite) menjaga efikasi pengendalian kebun.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-card-item accordion-item">
+          <button type="button" class="accordion-trigger faq-trigger-btn" aria-expanded="false">
+            <span class="accordion-title">Apakah hasil deteksi ini menggantikan konsultasi dengan petugas PPL?</span>
+            <div class="accordion-icon-box" aria-hidden="true">
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9l6 6 6-6"></path>
+              </svg>
+            </div>
+          </button>
+          <div class="accordion-panel faq-expandable-content">
+            <div class="accordion-clip">
+              <div class="accordion-body-inner faq-expandable-inner">
+                <p class="accordion-desc max-w-[68ch]">MusaVision dirancang sebagai sistem pendukung keputusan (skrining dini) di kebun. Verifikasi lapangan tetap dianjurkan bersama Petugas Penyuluh Lapangan (PPL) atau Pengamat Organisme Pengganggu Tumbuhan (POPT) setempat untuk menentukan dosis dan volume semprot yang tepat.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tombol Menuju Katalog Patogen -->
+      <div class="text-center mt-6">
+        <a href="/katalog-patogen" class="btn-forest-cta">
+          <span>Buka Katalog Patogen</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 8. PRE-FOOTER CTA & FLOATING WHITE FOOTER CARD -->
+  <section class="section-prefooter" style="background-image: url('/static/samples/musavision_hero_bg.jpg');">
+    <div class="prefooter-gradient-scrim"></div>
+
+    <div class="relative z-10 max-w-[760px] w-full mx-auto text-center pt-8">
+      <h2 class="font-bold tracking-tight text-[#111812] leading-[1.15]">
+        <span class="block font-medium text-[#111812]">Wujudkan Kebun Pisang</span>
+        <span class="font-serif italic font-normal text-[#163C24] block mt-1">Sehat &amp; Bebas Penyakit.</span>
+      </h2>
+      <p class="text-sm sm:text-base text-[#3E4640] max-w-[540px] mx-auto leading-relaxed mt-4 font-normal">
+        Gunakan MusaVision untuk mengenali bercak daun sejak dini, menjaga fotosintesis kanopi dan mencegah resistensi fungisida.
+      </p>
+      <div class="mt-7">
+        <a href="/deteksi" class="btn-forest-cta">
+          <span>Mulai Deteksi Sekarang</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Kartu Footer Putih Mengambang (Floating White Footer Card) -->
+    <div class="floating-footer-card">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 pb-10 border-b border-[#ECEEEA]">
+        
+        <!-- Kolom 1: Logo & Deskripsi -->
+        <div class="md:col-span-5 space-y-3.5">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-[#DDF247] text-[#111812] flex items-center justify-center font-bold shadow-xs">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+              </svg>
+            </div>
+            <span class="text-lg font-bold text-[#111812]">MusaVision</span>
+          </div>
+          <p class="text-xs sm:text-sm text-[#4B524C] leading-relaxed max-w-sm">
+            Platform kecerdasan buatan terapan berbasis YOLO26 Nano dan adaptasi kontras CIE-LAB CLAHE untuk deteksi objektif patologi daun pisang serta rekomendasi rotasi fungisida berstandar FRAC.
+          </p>
+          <div class="text-xs sm:text-sm text-[#4B524C]">
+            Sistem pendukung keputusan skrining dini; verifikasi lapang tetap dianjurkan bersama petugas PPL/POPT setempat.
+          </div>
+        </div>
+
+        <!-- Kolom 2: Navigasi -->
+        <div class="md:col-span-2 space-y-2.5">
+          <div class="text-xs sm:text-sm font-mono font-bold text-[#111812] uppercase tracking-wider">Navigasi</div>
+          <ul class="space-y-2 text-xs sm:text-sm text-[#4B524C]">
+            <li><a href="#beranda" class="hover:text-[#163C24] transition">Beranda</a></li>
+            <li><a href="#misi" class="hover:text-[#163C24] transition">Misi &amp; Filosofi</a></li>
+            <li><a href="#keunggulan" class="hover:text-[#163C24] transition">Keunggulan</a></li>
+            <li><a href="/deteksi" class="hover:text-[#163C24] transition">Deteksi AI</a></li>
+            <li><a href="#performa" class="hover:text-[#163C24] transition">Validasi Performa</a></li>
+            <li><a href="#sanitasi" class="hover:text-[#163C24] transition">Sanitasi Kebun</a></li>
+            <li><a href="/katalog-patogen" class="hover:text-[#163C24] transition">Katalog Patogen</a></li>
+          </ul>
+        </div>
+
+        <!-- Kolom 3: Solusi Fitur -->
+        <div class="md:col-span-3 space-y-2.5">
+          <div class="text-xs sm:text-sm font-mono font-bold text-[#111812] uppercase tracking-wider">Teknologi &amp; Fitur</div>
+          <ul class="space-y-2 text-xs sm:text-sm text-[#4B524C]">
+            <li><span class="font-medium text-[#111812]">YOLO26 Nano:</span> Inferensi Cepat</li>
+            <li><span class="font-medium text-[#111812]">CIE-LAB CLAHE:</span> Kontras Kanal L</li>
+            <li><span class="font-medium text-[#111812]">Gatekeeper:</span> Filter Anti Objek Asing</li>
+            <li><span class="font-medium text-[#111812]">Standar FRAC:</span> Rotasi Bahan Aktif</li>
+            <li><span class="font-medium text-[#111812]">Deleafing:</span> Menjaga 6-8 Daun</li>
+          </ul>
+        </div>
+
+        <!-- Kolom 4: Riset Skripsi -->
+        <div class="md:col-span-2 space-y-2.5">
+          <div class="text-xs sm:text-sm font-mono font-bold text-[#111812] uppercase tracking-wider">Riset Akademik</div>
+          <ul class="space-y-2 text-xs sm:text-sm text-[#4B524C]">
+            <li>Skripsi Visi Komputer</li>
+            <li>YOLO26n + CIE-LAB</li>
+            <li>Evaluasi SUS 84.0</li>
+            <li>Basis Data IndexedDB</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm text-[#4B524C]">
+        <div>&copy; 2026 MusaVision. Hak Cipta Dilindungi Undang-Undang.</div>
+        <div class="flex items-center gap-4">
+          <a href="#beranda" class="hover:text-[#111812] transition">Beranda</a>
+          <span>&middot;</span>
+          <a href="/deteksi" class="hover:text-[#111812] transition">Deteksi</a>
+          <span>&middot;</span>
+          <a href="/katalog-patogen" class="hover:text-[#111812] transition">Katalog</a>
+          <span>&middot;</span>
+          <a href="#faq-section" class="hover:text-[#111812] transition">FAQ</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox Modal Fullscreen -->
+  <div id="lightboxModal" class="hidden fixed inset-0 z-[150] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 pt-24 sm:pt-28 pb-8 overflow-y-auto">
+    <div class="relative max-w-4xl w-full bg-[#163C24] rounded-3xl overflow-hidden border border-white/10 shadow-xl flex flex-col">
+      <div class="flex items-center justify-between p-4 border-b border-white/10 text-white">
+        <span class="text-xs font-semibold" id="lightboxCaption">Pratinjau Citra Resolusi Penuh</span>
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1 bg-white/10 p-1 rounded-full text-xs">
+            <button type="button" id="lbTabAnnotated" onclick="switchLightboxTab('annotated')" class="px-3 py-1 rounded-full text-white active">YOLO26n</button>
+            <button type="button" id="lbTabClahe" onclick="switchLightboxTab('clahe')" class="px-3 py-1 rounded-full text-white/80 hover:text-white">CLAHE</button>
+            <button type="button" id="lbTabOrig" onclick="switchLightboxTab('orig')" class="px-3 py-1 rounded-full text-white/80 hover:text-white">Asli</button>
+          </div>
+          <button type="button" onclick="downloadDetectionResult()" class="p-1.5 rounded-full hover:bg-white/10 text-white" title="Unduh Gambar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
+          <button type="button" onclick="closeLightbox()" class="p-1.5 rounded-full hover:bg-white/10 text-white text-xl leading-none" title="Tutup">
+            &times;
+          </button>
+        </div>
+      </div>
+      <div class="p-4 flex items-center justify-center bg-black/60 max-h-[75vh] overflow-hidden">
+        <img id="lightboxImg" src="" alt="Zoom Citra" class="max-h-[70vh] w-auto max-w-full object-contain rounded-xl" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Detail Riwayat (IndexedDB Item Viewer) -->
+  <div id="historyDetailModal" class="hidden fixed inset-0 z-[150] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 pt-24 sm:pt-28 pb-8 overflow-y-auto">
+    <div class="relative max-w-xl w-full bg-white rounded-2xl overflow-hidden border border-[#E8EAE6] shadow-lg flex flex-col">
+      <div class="flex items-center justify-between p-5 border-b border-[#E8EAE6] bg-[#F6F7F4]">
+        <div>
+          <h3 id="hdmTitle" class="text-lg font-bold text-[#111812]">Detail Riwayat Pengujian</h3>
+          <p id="hdmSci" class="text-xs text-[#4B524C] italic">Musa spp.</p>
+        </div>
+        <button type="button" onclick="closeHistoryDetailModal()" class="w-8 h-8 rounded-full bg-white border border-[#E8EAE6] text-[#4B524C] hover:text-[#111812] flex items-center justify-center transition" aria-label="Tutup Modal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4 text-xs text-[#111812]">
+        <div class="flex gap-4 items-center bg-[#F6F7F4] p-3.5 rounded-2xl border border-[#E8EAE6]">
+          <img id="hdmImg" src="" alt="Thumbnail" class="w-20 h-20 object-cover rounded-xl border border-[#E8EAE6] bg-white" />
+          <div class="space-y-1">
+            <div class="font-mono text-xs text-[#4B524C]" id="hdmTime">-</div>
+            <div class="font-bold text-sm text-[#111812]" id="hdmFile">-</div>
+            <div class="font-semibold text-[#2F6B43]" id="hdmSeverity">-</div>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <span class="font-bold block text-[#111812]">Statistik Deteksi:</span>
+          <p id="hdmCounts" class="text-[#4B524C] bg-[#F6F7F4] p-2.5 rounded-xl border border-[#E8EAE6] font-mono">-</p>
+        </div>
+
+        <div class="space-y-1">
+          <span class="font-bold block text-[#111812]">Panduan Fungisida (FRAC):</span>
+          <p id="hdmFrac" class="text-[#4B524C] bg-[#F6F7F4] p-2.5 rounded-xl border border-[#E8EAE6] leading-relaxed">-</p>
+        </div>
+
+        <div class="space-y-1">
+          <span class="font-bold block text-[#111812]">Catatan Latensi Komputasi:</span>
+          <p id="hdmLatency" class="text-[#4B524C] bg-[#F6F7F4] p-2.5 rounded-xl border border-[#E8EAE6] font-mono text-xs">-</p>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-[#E8EAE6] bg-[#F6F7F4] flex justify-end">
+        <button type="button" onclick="closeHistoryDetailModal()" class="px-5 py-2 rounded-full bg-white border border-[#E8EAE6] text-[#111812] font-semibold text-xs hover:bg-slate-100 transition">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Back to Top Button (image_6.png) -->
+  <button id="backToTopBtn" type="button" onclick="scrollToTop()" class="back-to-top-btn opacity-0 pointer-events-none" aria-label="Kembali ke atas">
+    <span class="hidden sm:inline">Back to Top</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="19" x2="12" y2="5"></line>
+      <polyline points="5 12 12 5 19 12"></polyline>
+    </svg>
+  </button>
+
+  <!-- Skrip Animasi Eksternal (Opsional & Diisolasi) -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
+
+  <!-- Controller JavaScript Utama -->
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
