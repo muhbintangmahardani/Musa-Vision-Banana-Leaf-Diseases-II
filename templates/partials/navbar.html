@@ -1,0 +1,42 @@
+{% set is_light = (active_page != 'landing') %}
+{% set anchor_prefix = '' if active_page == 'landing' else '/' %}
+<header id="mainNavbar" class="navbar{% if is_light %} navbar--light is-scrolled{% endif %}" {% if is_light %}data-navbar-static="light"{% endif %} style="position: fixed; top: 0; left: 0; width: 100%; z-index: 50;">
+  <div class="navbar-container">
+    <a href="/" class="nav-logo-link flex items-center gap-2.5 active:scale-95 transition-transform">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0" aria-hidden="true">
+        <rect width="32" height="32" rx="9" fill="#DDF247"/>
+        <path d="M23.5 8.5C18 9 10.5 13.5 9 23C13.5 22.5 20.5 18.5 23.5 8.5Z" fill="#111812"/>
+        <path d="M9 23C12.5 18 17.5 13.5 23 8.8" stroke="#DDF247" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="nav-brand-text font-sans font-medium text-[1.05rem] tracking-[-0.01em] {% if is_light %}text-[#111812]{% else %}text-white{% endif %} leading-none">MusaVision</span>
+    </a>
+
+    <nav class="nav-center-pill" id="desktopNavPill">
+      <a href="{{ anchor_prefix }}#beranda" class="nav-item-link{% if active_page == 'landing' %} is-active{% endif %}" data-section="beranda" data-nav-key="beranda">
+        {% if active_page == 'landing' %}<span class="nav-dot-active"></span><span>Beranda</span>{% else %}Beranda{% endif %}
+      </a>
+      <a href="{{ anchor_prefix }}#misi" class="nav-item-link" data-section="misi" data-nav-key="misi">Misi</a>
+      <a href="{{ anchor_prefix }}#keunggulan" class="nav-item-link" data-section="keunggulan" data-nav-key="keunggulan">Keunggulan</a>
+      <a href="{{ anchor_prefix }}#deteksi" class="nav-item-link{% if active_page == 'deteksi' %} is-active{% endif %}" data-section="deteksi" data-nav-key="deteksi">
+        {% if active_page == 'deteksi' %}<span class="nav-dot-active"></span><span>Deteksi</span>{% else %}Deteksi{% endif %}
+      </a>
+      <a href="{{ anchor_prefix }}#performa" class="nav-item-link" data-section="performa" data-nav-key="performa">Performa</a>
+      <a href="{{ anchor_prefix }}#sanitasi" class="nav-item-link" data-section="sanitasi" data-nav-key="sanitasi">Sanitasi</a>
+      <a href="{{ anchor_prefix }}#katalog-preview" class="nav-item-link{% if active_page == 'katalog' %} is-active{% endif %}" data-section="katalog-preview" data-nav-key="katalog">
+        {% if active_page == 'katalog' %}<span class="nav-dot-active"></span><span>Katalog</span>{% else %}Katalog{% endif %}
+      </a>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a href="/deteksi" class="nav-cta-pill">
+        <span>Mulai Deteksi</span>
+      </a>
+
+      <button type="button" id="hamburgerBtn" onclick="toggleMobileMenu()" class="nav-ham-btn" aria-label="Menu" aria-expanded="false">
+        <span class="nav-ham-bar bar-1"></span>
+        <span class="nav-ham-bar bar-2"></span>
+        <span class="nav-ham-bar bar-3"></span>
+      </button>
+    </div>
+  </div>
+</header>

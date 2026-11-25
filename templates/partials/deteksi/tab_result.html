@@ -1,0 +1,279 @@
+<!-- VIEW 3: Hasil & Sanitasi -->
+<div id="tabViewResult" class="hidden space-y-6">
+
+  <!-- State Loading -->
+  <div id="loadingBox" class="hidden py-12 px-6 text-center space-y-4 bg-white rounded-2xl border border-[#E8EAE6]">
+    <div class="w-12 h-12 rounded-full border-3 border-[#163C24] border-t-transparent animate-spin mx-auto"></div>
+    <div>
+      <p class="text-base font-bold text-[#111812]">Memvalidasi citra daun &amp; menganalisis pola bercak...</p>
+      <p class="text-xs text-[#4B524C] mt-1 font-mono">Gatekeeper &rarr; CIE-LAB CLAHE &rarr; YOLO26 Nano</p>
+    </div>
+  </div>
+
+  <!-- State Ditolak Gatekeeper -->
+  <div id="rejectedBox" class="hidden py-8 px-6 space-y-3 text-center bg-rose-50 border border-rose-200 rounded-2xl text-rose-950">
+    <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center mx-auto">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+    </div>
+    <h4 id="rejectedTitle" class="text-lg font-bold text-rose-900">Objek Bukan Daun Pisang</h4>
+    <p id="rejectedReason" class="text-xs sm:text-sm text-rose-800 leading-relaxed max-w-lg mx-auto">
+      Citra yang diunggah teridentifikasi sebagai objek bukan daun pisang. Mohon fokuskan kamera pada permukaan helai daun pisang tanpa menyertakan pot, manusia, atau objek lain.
+    </p>
+    <div id="rejectedMetrics" class="text-xs font-mono text-rose-700 bg-white/80 p-2.5 rounded-xl border border-rose-200 mt-2 inline-block">
+      Validasi: Objek Bukan Daun Pisang
+    </div>
+  </div>
+
+  <!-- State Tanpa Deteksi -->
+  <div id="noDetectionBox" class="hidden py-8 px-6 space-y-2 text-center bg-amber-50 border border-amber-200 rounded-2xl text-amber-950">
+    <h4 class="text-base font-bold text-amber-900">Tidak Ada Lesi Bercak Terdeteksi</h4>
+    <p class="text-xs text-amber-800 leading-relaxed max-w-md mx-auto">
+      Tidak ditemukan bercak lesi patogen di atas ambang batas keyakinan pada citra ini.
+    </p>
+  </div>
+
+  <!-- State Initial Empty -->
+  <div id="initialEmptyBox" class="py-12 px-6 text-center flex flex-col items-center justify-center space-y-3 bg-white rounded-2xl border border-[#E8EAE6]">
+    <div class="w-12 h-12 rounded-2xl bg-[#F6F7F4] flex items-center justify-center text-[#2F6B43]">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+    </div>
+    <h3 class="text-base font-bold text-[#111812]">Belum Ada Hasil Diagnosis</h3>
+    <p class="text-xs text-[#4B524C] max-w-md">
+      Pilih sampel daun di Tab 2 atau unggah foto di Tab 1, lalu klik Analisis Daun Pisang.
+    </p>
+  </div>
+
+  <!-- State Sukses: Visual Result Box (2 Kolom Sejajar di Desktop, 1 Kolom di Mobile) -->
+  <div id="visualResultBox" class="hidden w-full max-w-full">
+    <!-- Blok Atas: Kolom Kiri & Kolom Kanan (Sticky berhenti di batas bawah kolom kanan) -->
+    <div class="result-top-grid">
+
+      <!-- KOLOM KIRI (Panel Visualisasi Daun: Sticky di Desktop) -->
+      <div class="detection-card detection-card-sticky bg-white rounded-2xl p-4 sm:p-5 border border-[#E8EAE6] shadow-xs space-y-3.5">
+
+        <!-- 1. Segmented Bar 3 Tab Visual (1 Baris Penuh, ZERO Text Wrap) -->
+        <div class="detection-view-tabs bg-[#F4F5F2] p-1 rounded-xl border border-[#E5E7E2] grid grid-cols-3 gap-1 text-center w-full">
+          <button type="button" id="btnSwitchAnnotated" onclick="switchVerdictView('annotated')" class="detection-tab-btn active">
+            Hasil Deteksi
+          </button>
+          <button type="button" id="btnSwitchClahe" onclick="switchVerdictView('clahe')" class="detection-tab-btn">
+            CIE-LAB CLAHE
+          </button>
+          <button type="button" id="btnSwitchOrig" onclick="switchVerdictView('orig')" class="detection-tab-btn">
+            Foto Asli
+          </button>
+        </div>
+
+        <!-- 2. Panggung Pratinjau Citra (Permukaan Bersih Selebar Panel Kiri) -->
+        <div class="detection-visual-stage">
+          <div id="workspacePlaceholder" class="hidden"></div>
+          <img id="activeDisplayImg" class="detection-visual-img" src="" alt="Citra Daun Pisang" />
+          <img id="verdictActiveImg" class="hidden" src="" alt="Citra Tersembunyi" />
+        </div>
+
+        <!-- 3. 3 Thumbnail Pembanding di Bawah Kanvas -->
+        <div class="detection-thumbnails-grid grid grid-cols-3 gap-2.5 pt-0.5">
+          <div class="aspect-[4/3] rounded-xl overflow-hidden border border-[#E5E7E2] hover:border-[#163C24] cursor-pointer bg-[#F7F8F5] p-1 text-center transition" onclick="switchVerdictView('orig')">
+            <div id="phImgOrig" class="h-full flex items-center justify-center text-xs text-[#4B524C] font-sans">1. Asli</div>
+            <img id="imgOrig" src="" class="hidden w-full h-full object-cover rounded-lg" alt="Asli" />
+            <span id="badgeImgOrig" class="hidden"></span>
+          </div>
+          <div class="aspect-[4/3] rounded-xl overflow-hidden border border-[#E5E7E2] hover:border-[#163C24] cursor-pointer bg-[#F7F8F5] p-1 text-center transition" onclick="switchVerdictView('clahe')">
+            <div id="phImgClahe" class="h-full flex items-center justify-center text-xs text-[#4B524C] font-sans">2. CLAHE</div>
+            <img id="imgClahe" src="" class="hidden w-full h-full object-cover rounded-lg" alt="CLAHE" />
+            <span id="badgeImgClahe" class="hidden"></span>
+          </div>
+          <div class="aspect-[4/3] rounded-xl overflow-hidden border border-[#E5E7E2] hover:border-[#163C24] cursor-pointer bg-[#F7F8F5] p-1 text-center transition" onclick="switchVerdictView('annotated')">
+            <div id="phImgAnnotated" class="h-full flex items-center justify-center text-xs text-[#4B524C] font-sans">3. YOLO26n</div>
+            <img id="imgAnnotated" src="" class="hidden w-full h-full object-cover rounded-lg" alt="YOLO26n" />
+            <span id="badgeImgAnnotated" class="hidden"></span>
+          </div>
+        </div>
+
+        <!-- 4. Baris Aksi 2 Kolom Seimbang Tepat di Bawah Thumbnail -->
+        <div class="detection-actions-bar grid grid-cols-2 gap-2.5 pt-1">
+          <button type="button" onclick="openLightboxFullscreen()" class="btn-action-perbesar">
+            Perbesar
+          </button>
+          <button type="button" onclick="downloadDetectionResult()" class="btn-action-download">
+            <span>Unduh JPG</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- KOLOM KANAN (Diagnosis & Tindakan Agronomi Lengkap) -->
+      <div class="detection-card bg-white rounded-2xl p-5 sm:p-6 border border-[#E8EAE6] shadow-xs space-y-5">
+
+        <!-- 1. Header Diagnosis & Keparahan -->
+        <div>
+          <div class="flex items-center justify-between gap-3 flex-wrap mb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#2F6B43]"></span>
+              <span class="text-xs font-semibold text-[#2F6B43] uppercase tracking-wider">Hasil Diagnosis Valid</span>
+            </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-[#F4F6F2] rounded-full text-[0.8125rem] font-semibold text-[#111812] shrink-0 border border-[#E5E7E2]">
+              <span class="text-[#4B524C] font-normal">Keyakinan AI</span>
+              <span id="verdictConfPct" class="font-bold text-[#2F6B43] tabular-nums">96.4%</span>
+            </div>
+          </div>
+
+          <div class="w-full">
+            <h3 id="agroName" class="w-full text-2xl sm:text-3xl font-bold text-[#111812] tracking-tight leading-snug">
+              <span class="block">Sigatoka Hitam</span>
+              <span class="block text-sm sm:text-base font-normal text-[#4B524C] font-sans mt-0.5">(Black Sigatoka)</span>
+            </h3>
+            <p class="text-sm text-[#37413A] mt-1 flex flex-wrap items-center gap-1.5">
+              <span id="agroSci" class="italic font-serif font-normal text-[0.95rem] text-[#111812]">Pseudocercospora fijiensis</span>
+            </p>
+          </div>
+          <div id="verdictConfBar" class="hidden"></div>
+        </div>
+
+        <!-- 2. Metrik Numerik Ringkas -->
+        <div class="detection-summary-strip grid grid-cols-3 gap-2 py-3 px-3.5 rounded-xl bg-[#F6F7F4] border-none text-center">
+          <div>
+            <div class="summary-num tabular-nums text-xl sm:text-2xl font-bold text-[#111812]" id="lesionCount">0</div>
+            <div class="summary-label text-xs font-medium text-[#4B524C] mt-0.5">Bercak Lesi</div>
+          </div>
+          <div>
+            <div class="summary-num tabular-nums text-xl sm:text-2xl font-bold text-[#111812]" id="leafCount">1</div>
+            <div class="summary-label text-xs font-medium text-[#4B524C] mt-0.5">Helai Daun</div>
+          </div>
+          <div>
+            <div class="summary-num tabular-nums text-lg sm:text-2xl font-bold text-[#2F6B43] whitespace-nowrap" id="latServer">42 <span class="text-xs font-sans font-medium text-[#4B524C]">ms</span></div>
+            <div class="summary-label text-xs font-medium text-[#4B524C] mt-0.5">Latensi Server</div>
+          </div>
+        </div>
+
+        <!-- 3. Status Keparahan & Progress Slider -->
+        <div class="detection-agro-block space-y-2 pt-2 border-t border-[#EEF0EC]">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+            <span class="font-bold text-sm text-[#111812]">Tingkat Keparahan:</span>
+            <span id="agroSeverity" class="font-bold text-xs bg-[#FEE2E2] text-[#991B1B] border border-[#FECACA] px-2.5 py-0.5 rounded-full whitespace-nowrap self-start sm:self-auto">Ganas Utama</span>
+          </div>
+          <p id="agroSeverityDetail" class="text-xs sm:text-sm text-[#4B524C] leading-snug">Risiko kehilangan hasil panen hingga 50% jika kanopi daun aktif rusak.</p>
+          <div class="h-2.5 w-full rounded-full bg-gradient-to-r from-[#2F6B43] via-[#D97706] to-[#DC2626] relative mt-1">
+            <span id="severityMarker" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-[#111812] shadow" style="left: 88%;"></span>
+          </div>
+        </div>
+
+        <!-- 4. Sanitasi & Pemangkasan (Deleafing) -->
+        <div class="detection-agro-block space-y-2 pt-4 border-t border-[#EEF0EC]">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+            <div class="detection-agro-title text-sm sm:text-base font-bold tracking-normal text-[#163C24]">Sanitasi &amp; Pemangkasan (Deleafing)</div>
+            <span class="self-start sm:self-auto shrink-0 whitespace-nowrap text-xs font-semibold text-[#2F6B43] bg-[#F4F6F2] px-2.5 py-0.5 rounded-full border border-[#E2E6DE]">Protokol Mekanis</span>
+          </div>
+          <p id="agroDeleafing" class="detection-agro-desc text-sm sm:text-base text-[#37413A] leading-relaxed">
+            Pangkas bagian helai daun nekrotik dan telungkupkan sisa potongan ke tanah agar spora tidak terangkat angin. Wajib mempertahankan minimal 6 sampai 8 daun sehat.
+          </p>
+          <div class="pt-2.5 flex items-center justify-between text-sm text-[#4B524C] font-sans">
+            <span>Target Kanopi</span>
+            <span class="text-[#111812] font-semibold">&ge; 6 sampai 8 Daun Sehat</span>
+          </div>
+        </div>
+
+        <!-- 5. Panduan Rotasi Bahan Aktif (FRAC) -->
+        <div class="detection-agro-block space-y-2 pt-4 border-t border-[#EEF0EC]">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+            <div class="detection-agro-title text-sm sm:text-base font-bold tracking-normal text-[#163C24]">Panduan Rotasi Bahan Aktif (FRAC)</div>
+            <span class="self-start sm:self-auto shrink-0 whitespace-nowrap text-xs font-semibold text-[#163C24] bg-[#F7F8F5] px-2.5 py-0.5 rounded-full border border-[#E8ECE6]">Anti-Resistensi</span>
+          </div>
+          <div id="agroFracShort" class="hidden"></div>
+          <div id="agroFracBadges" class="space-y-2 pt-1"></div>
+          <p id="agroFracText" class="detection-agro-desc text-sm text-[#37413A] leading-relaxed pt-1">
+            Rotasi Triazol (FRAC 3) dengan Strobilurin (FRAC 11) dan kontak multisite (FRAC M03/M05) untuk mencegah resistensi jamur patogen.
+          </p>
+          <div class="pt-2.5 flex items-center justify-between text-sm text-[#4B524C] font-sans">
+            <span>Strategi Semprot</span>
+            <span class="text-[#111812] font-semibold">Maksimal 2x Berturut</span>
+          </div>
+        </div>
+
+        <!-- 6. Catatan Perlindungan Tanaman (PPL & POPT) -->
+        <div class="p-4 rounded-xl bg-amber-50/80 border border-amber-200 text-xs sm:text-sm text-amber-950 space-y-1">
+          <span class="font-bold block text-amber-950 text-xs sm:text-sm">Catatan Perlindungan Tanaman (PPL &amp; POPT):</span>
+          <p id="agroDisclaimer" class="text-amber-900 leading-relaxed text-xs sm:text-sm">
+            Rekomendasi fungisida bersifat panduan teknis berstandar FRAC internasional. Selalu konsultasikan dosis dengan Penyuluh Pertanian Lapangan (PPL) setempat.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Blok Bawah: Tabel Bounding Box & Telemetri Latensi (Di luar parent grid atas) -->
+    <div class="result-bottom-stack space-y-5">
+
+      <!-- Tabel Rincian Bounding Box Detail -->
+      <div class="detection-card bg-white rounded-2xl p-4 sm:p-6 border border-[#E5E7E2] shadow-xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-x-4 gap-y-2 flex-wrap mb-3.5">
+          <div class="table-bbox-title text-sm font-bold text-[#111812]">Rincian Bounding Box Deteksi</div>
+          <span class="text-xs font-mono text-[#4B524C] shrink-0">Koordinat [x1, y1, x2, y2] &middot; Normalisasi 0-1</span>
+        </div>
+        <div class="w-full overflow-x-auto">
+          <table class="detection-bbox-table w-full text-left border-collapse text-xs min-w-[550px]">
+            <thead>
+              <tr class="border-b border-[#E5E7E2] text-[#4B524C] font-semibold font-mono bg-[#FAFBF9]">
+                <th class="py-3 px-3.5">#</th>
+                <th class="py-3 px-3.5">Kelas Diagnosa</th>
+                <th class="py-3 px-3.5">Keyakinan</th>
+                <th class="py-3 px-3.5">Rasio Luas</th>
+                <th class="py-3 px-3.5">Granularitas</th>
+                <th class="py-3 px-3.5">Koordinat [x1, y1, x2, y2]</th>
+              </tr>
+            </thead>
+            <tbody id="bboxTableBody" class="divide-y divide-[#E5E7E2] font-mono text-xs">
+              <tr><td colspan="6" class="py-3.5 px-3.5 text-center text-[#4B524C]">Belum ada pengujian daun yang dijalankan.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Bilah Telemetri Latensi Komputasi -->
+      <div class="detection-card bg-white rounded-2xl p-4 sm:p-5 border border-[#E8EAE6] shadow-xs">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold text-[#111812] uppercase tracking-wider font-mono">Telemetri Latensi Komputasi</span>
+          <span class="text-xs font-mono text-[#4B524C]">Millisecond (ms)</span>
+        </div>
+        <div class="detection-telemetry-grid grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-center text-xs">
+          <div class="bg-[#F6F7F4] p-2.5 rounded-xl border border-[#EEF0EC]">
+            <div class="text-xs text-[#4B524C] uppercase font-mono">Pra-Proses</div>
+            <div id="latPre" class="font-mono font-bold text-[#111812] mt-0.5">2.4 ms</div>
+          </div>
+          <div class="bg-[#F6F7F4] p-2.5 rounded-xl border border-[#EEF0EC]">
+            <div class="text-xs text-[#4B524C] uppercase font-mono">Inferensi+NMS</div>
+            <div id="latInf" class="font-mono font-bold text-[#111812] mt-0.5">32.8 ms</div>
+          </div>
+          <div class="bg-[#F6F7F4] p-2.5 rounded-xl border border-[#EEF0EC]">
+            <div class="text-xs text-[#4B524C] uppercase font-mono">Pasca-Proses</div>
+            <div id="latPost" class="font-mono font-bold text-[#111812] mt-0.5">6.8 ms</div>
+          </div>
+          <div class="bg-[#F6F7F4] p-2.5 rounded-xl border border-[#EEF0EC]">
+            <div class="text-xs text-[#4B524C] uppercase font-mono">Klien Roundtrip</div>
+            <div id="latClient" class="font-mono font-bold text-[#111812] mt-0.5">182 ms</div>
+          </div>
+          <div class="bg-[#F6F7F4] p-2.5 rounded-xl border border-[#EEF0EC] col-span-2 sm:col-span-1">
+            <div class="text-xs text-[#2F6B43] uppercase font-mono font-semibold">Total Server</div>
+            <div id="totalDetCount" class="font-mono font-bold text-[#2F6B43] mt-0.5 whitespace-nowrap tabular-nums">42.0 ms</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

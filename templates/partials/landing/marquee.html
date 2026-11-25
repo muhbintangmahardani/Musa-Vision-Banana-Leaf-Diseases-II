@@ -1,0 +1,24 @@
+{% set marquee_items = [
+  ('YOLO26 Nano', true),
+  ('CIE-LAB CLAHE', true),
+  ('Gatekeeper Validasi', false),
+  ('Standar Kode FRAC', true),
+  ('Deleafing 6-8 Daun', false)
+] %}
+<section class="tech-standards-bar">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-3 sm:gap-4 overflow-hidden">
+    <span class="text-sm sm:text-base font-semibold text-[#3E4640] tracking-normal whitespace-nowrap shrink-0">
+      Didukung standar teknologi &amp; agronomi:
+    </span>
+    <div class="tech-marquee-wrapper w-full">
+      <div class="tech-marquee-track">
+        {% for _ in range(2) %}
+          {% for label, is_mono in marquee_items %}
+          <div class="tech-item"><span class="tech-item-dot"></span><span{% if is_mono %} class="font-mono"{% endif %}>{{ label }}</span></div>
+          <span class="text-[#D2D6CE]">&middot;</span>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>

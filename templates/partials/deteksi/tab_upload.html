@@ -1,0 +1,165 @@
+<!-- VIEW 1: Unggah / Kamera -->
+<div id="tabViewUpload" class="space-y-6">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+    <!-- Area Drag and Drop & Tombol Input -->
+    <div class="lg:col-span-6 space-y-4">
+      <div class="upload-action-grid upload-actions-grid">
+        <label for="imageInput" id="btnUploadImageTrigger" role="button" tabindex="0" class="upload-action-card upload-action-btn shadow-xs group select-none">
+          <div class="upload-action-icon bg-[#DDF247] text-[#111812] shadow-xs">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <div class="upload-action-text min-w-0">
+            <div class="upload-action-title font-semibold text-[#111812] whitespace-nowrap">Pilih Berkas</div>
+            <div class="upload-action-sub text-[#4B524C] whitespace-nowrap">JPG, PNG, WEBP</div>
+          </div>
+        </label>
+
+        <label for="cameraInput" id="btnCameraTrigger" role="button" tabindex="0" class="upload-action-card upload-action-btn shadow-xs group select-none">
+          <div class="upload-action-icon bg-[#163C24] text-white shadow-xs">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>
+              <circle cx="12" cy="13" r="3"></circle>
+            </svg>
+          </div>
+          <div class="upload-action-text min-w-0">
+            <div class="upload-action-title font-semibold text-[#111812] whitespace-nowrap">Kamera Langsung</div>
+            <div class="upload-action-sub text-[#4B524C] whitespace-nowrap">Foto Daun Kebun</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Dropzone Drag & Drop -->
+      <div id="dropzoneArea" class="border-2 border-dashed border-[#C5CAC0] hover:border-[#163C24] bg-white/70 hover:bg-white rounded-2xl p-8 text-center transition cursor-pointer flex flex-col items-center justify-center space-y-2" onclick="document.getElementById('imageInput').click()">
+        <div class="w-12 h-12 rounded-full bg-[#F6F7F4] flex items-center justify-center text-[#2F6B43]">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
+            <circle cx="9" cy="9" r="2"></circle>
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
+          </svg>
+        </div>
+        <div class="text-sm sm:text-base font-bold text-[#111812]">Tarik &amp; Letakkan Foto Daun ke Sini</div>
+        <div class="text-xs sm:text-sm text-[#4B524C]">Mendukung foto daun pisang segar atau bercak hingga 16 MB</div>
+      </div>
+
+      <!-- Pengaturan Peneliti Terlipat (Tertutup secara bawaan) -->
+      <details class="researcher-panel" id="researcherPanel">
+        <summary>
+          <span>Pengaturan Lanjutan (Mode Peneliti / Pengujian)</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </summary>
+
+        <div class="pt-4 space-y-4 border-t border-[#E8EAE6] mt-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-xs font-bold text-[#111812]">Penajaman CIE-LAB CLAHE</div>
+              <div class="text-xs text-[#4B524C]">Meningkatkan mikrokontras kanal L tanpa menggeser warna daun</div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="useClaheToggle" checked class="sr-only peer" />
+              <div class="w-10 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-transform peer-checked:bg-[#163C24]"></div>
+            </label>
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs">
+              <span class="font-semibold text-[#111812]">Ambang Keyakinan (Confidence)</span>
+              <span id="confValue" class="font-mono font-bold text-[#2F6B43]">0.25</span>
+            </div>
+            <input type="range" id="confSlider" min="0.10" max="0.85" step="0.05" value="0.25" class="w-full h-1.5 bg-[#E8EAE6] rounded-lg appearance-none cursor-pointer accent-[#163C24]" />
+            <div class="flex justify-between text-xs text-[#4B524C] font-mono">
+              <span>0.10 (Sensitif)</span>
+              <span>0.25 (Default)</span>
+              <span>0.85 (Ketat)</span>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs">
+              <span class="font-semibold text-[#111812]">Ambang IoU NMS</span>
+              <span id="iouValue" class="font-mono font-bold text-[#2F6B43]">0.45</span>
+            </div>
+            <input type="range" id="iouSlider" min="0.20" max="0.80" step="0.05" value="0.45" class="w-full h-1.5 bg-[#E8EAE6] rounded-lg appearance-none cursor-pointer accent-[#163C24]" />
+            <div class="flex justify-between text-xs text-[#4B524C] font-mono">
+              <span>0.20 (Pemisahan Ketat)</span>
+              <span>0.45 (Standar YOLO)</span>
+              <span>0.80 (Toleran)</span>
+            </div>
+          </div>
+
+          <div class="hidden">
+            <input type="checkbox" id="bypassGatekeeper" />
+          </div>
+        </div>
+      </details>
+
+      <!-- Tombol Aksi -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 pt-2">
+        <button id="predictBtn" type="button" onclick="runPrediction()" class="w-full sm:flex-1 bg-[#DDF247] hover:bg-[#CEE435] text-[#111812] font-bold text-xs sm:text-sm py-3.5 px-6 rounded-full shadow-md flex items-center justify-center gap-2 transition active:scale-[0.98]">
+          <span>Analisis Daun Pisang</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+
+        <button id="resetBtn" type="button" onclick="resetDetectionState()" class="w-full sm:w-auto bg-white hover:bg-slate-100 border border-[#E8EAE6] text-[#111812] font-semibold text-xs sm:text-sm py-3.5 px-5 rounded-full shadow-xs flex items-center justify-center gap-2 transition" title="Reset">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+          <span>Reset</span>
+        </button>
+      </div>
+
+      <!-- Native Hidden File Inputs -->
+      <input type="file" id="imageInput" accept="image/*" class="sr-only fixed -top-96 -left-96 opacity-0 pointer-events-none" />
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" class="sr-only fixed -top-96 -left-96 opacity-0 pointer-events-none" />
+    </div>
+
+    <!-- Pratinjau Citra Terpilih di Kolom Kanan -->
+    <div class="lg:col-span-6 flex flex-col justify-between">
+      <div id="controlImagePreviewBox" class="w-full aspect-video sm:aspect-[16/11] rounded-2xl overflow-hidden bg-[#163C24] relative flex items-center justify-center">
+
+        <div id="controlEmptyPrompt" class="text-center p-6 text-white/60 space-y-2">
+          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white/70 mx-auto">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
+              <circle cx="9" cy="9" r="2"></circle>
+              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
+            </svg>
+          </div>
+          <div class="text-xs font-semibold text-white/90">Pratinjau Citra Daun</div>
+          <div class="text-xs text-white/60">Foto yang dipilih akan langsung tampil di sini</div>
+        </div>
+
+        <img id="controlPreviewImg" src="" class="hidden w-full h-full object-cover object-center" alt="Pratinjau Citra Terpilih" />
+
+        <div id="controlPreviewOverlay" class="hidden absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent flex items-end justify-between p-3.5 pointer-events-none">
+          <div class="flex items-center gap-1.5 text-white">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#DDF247]"></span>
+            <span class="text-xs font-mono font-semibold truncate max-w-[220px]" id="controlPreviewBadge">sample.jpg</span>
+          </div>
+          <button type="button" onclick="clearSelectedFile()" class="pointer-events-auto bg-black/60 hover:bg-black/80 text-white rounded-full p-1.5 text-xs transition" title="Hapus foto">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="selectedFileName" class="hidden mt-3 text-xs text-[#4B524C] font-mono flex items-center gap-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#2F6B43]"></span>
+        <span id="fileNameText">foto_daun.jpg</span>
+      </div>
+    </div>
+
+  </div>
+</div>

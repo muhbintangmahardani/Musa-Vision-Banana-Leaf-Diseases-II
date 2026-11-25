@@ -1,816 +1,308 @@
-<!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Atlas Patogen Daun Pisang &middot; MusaVision</title>
-  
-  <!-- Favicon Tab Bar Daun Pisang Cerdas (Inline SVG Kotak Membulat Lime Solid) -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23DDF247'/%3E%3Cpath d='M23.5 8.5C18 9 10.5 13.5 9 23C13.5 22.5 20.5 18.5 23.5 8.5Z' fill='%23111812'/%3E%3Cpath d='M9 23C12.5 18 17.5 13.5 23 8.8' stroke='%23DDF247' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E">
+{% extends 'layouts/base.html' %}
 
-  <!-- Font Setup: Manrope, Instrument Serif, & JetBrains Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            alabaster: '#F6F7F4',
-            surface: '#FFFFFF',
-            forest: {
-              DEFAULT: '#163C24',
-              soft: '#1F5332',
-              dark: '#0F2A19'
-            },
-            botanical: {
-              DEFAULT: '#163C24',
-              hover: '#0F2A19'
-            },
-            lime: {
-              agro: '#DDF247'
-            },
-            charcoal: '#111812',
-            muted: '#4B524C',
-            subtle: '#E6E6E2'
-          },
-          fontFamily: {
-            sans: ['"Manrope"', 'system-ui', '-apple-system', 'sans-serif'],
-            serif: ['"Instrument Serif"', 'Georgia', 'serif'],
-            mono: ['"JetBrains Mono"', 'monospace']
-          }
-        }
-      }
-    }
-  </script>
-  <link rel="stylesheet" href="/static/css/style.css">
-  <style>
-    /* Segmented Capsule Tabs */
-    .catalog-tab-btn {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #4B524C;
-      border-radius: 9999px;
-      background: transparent;
-      border: 1px solid transparent;
-      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-    .catalog-tab-btn:hover {
-      color: #111812;
-      background: rgba(255, 255, 255, 0.6);
-    }
-    .catalog-tab-btn.is-active {
-      color: #111812;
-      font-weight: 700;
-      background: #FFFFFF;
-      border-color: #E2E6DE;
-      box-shadow: 0 1px 3px rgba(17, 24, 18, 0.08);
-    }
-    .catalog-tab-btn.is-active .catalog-tab-num {
-      color: #163C24;
-      font-weight: 700;
-    }
-    .catalog-tab-num {
-      font-family: '"JetBrains Mono"', monospace;
-      font-size: 11px;
-      color: #7A8076;
-      transition: color 0.2s ease;
-    }
+{% block title %}Atlas Patogen Daun Pisang &middot; MusaVision{% endblock %}
 
-    /* Baris Tabel Komparasi Aktif */
-    .comp-row {
-      cursor: pointer;
-      transition: background-color 0.15s ease;
-    }
-    .comp-row:hover {
-      background-color: #FAFBF9;
-    }
-    .comp-row.is-active {
-      background-color: #F0F4ED;
-    }
-    .comp-row.is-active td {
-      color: #111812;
-    }
-  </style>
-</head>
-<body class="bg-white text-[#111812] font-sans antialiased selection:bg-[#DDF247] selection:text-[#111812]">
+{% block meta_description %}
+  <meta name="description" content="Katalog patogen daun pisang MusaVision: identifikasi morfologi lesi, tingkat risiko panen, protokol sanitasi deleafing, dan panduan rotasi fungisida berstandar FRAC." />
+{% endblock %}
 
-  <!-- 1. TOP FIXED NAVBAR (SERAGAM 1:1 DENGAN HALAMAN UTAMA) -->
-  <header id="mainNavbar" class="navbar navbar--light is-scrolled" data-navbar-static="light" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 50;">
-    <div class="navbar-container">
-      
-      <!-- Brand Logo Bersih (Kotak Membulat Lime Solid 32x32 + Wordmark 1 Baris) -->
-      <a href="/" class="nav-logo-link flex items-center gap-2.5 active:scale-95 transition-transform">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
-          <rect width="32" height="32" rx="9" fill="#DDF247"/>
-          <path d="M23.5 8.5C18 9 10.5 13.5 9 23C13.5 22.5 20.5 18.5 23.5 8.5Z" fill="#111812"/>
-          <path d="M9 23C12.5 18 17.5 13.5 23 8.8" stroke="#DDF247" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <span class="nav-brand-text font-sans font-medium text-[1.05rem] tracking-[-0.01em] text-[#111812] leading-none">MusaVision</span>
-      </a>
+{% block main_class %}page-container-standalone max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-20{% endblock %}
 
-      <!-- Middle Capsule Glass Pill -->
-      <nav class="nav-center-pill" id="desktopNavPill">
-        <a href="/#beranda" class="nav-item-link" data-nav-key="beranda">Beranda</a>
-        <a href="/#misi" class="nav-item-link" data-nav-key="misi">Misi</a>
-        <a href="/#keunggulan" class="nav-item-link" data-nav-key="keunggulan">Keunggulan</a>
-        <a href="/#deteksi" class="nav-item-link" data-nav-key="deteksi">Deteksi</a>
-        <a href="/#performa" class="nav-item-link" data-nav-key="performa">Performa</a>
-        <a href="/#sanitasi" class="nav-item-link" data-nav-key="sanitasi">Sanitasi</a>
-        <a href="/#katalog-preview" class="nav-item-link is-active" data-nav-key="katalog">
-          <span class="nav-dot-active"></span>
-          <span>Katalog</span>
-        </a>
-      </nav>
-
-      <!-- Right CTA Pill & Mobile Hamburger -->
-      <div class="flex items-center gap-2">
-        <a href="/deteksi" class="nav-cta-pill">
-          <span>Mulai Deteksi</span>
-        </a>
-
-        <button type="button" id="hamburgerBtn" onclick="toggleMobileMenu()" class="nav-ham-btn" aria-label="Menu" aria-expanded="false">
-          <span class="nav-ham-bar bar-1"></span>
-          <span class="nav-ham-bar bar-2"></span>
-          <span class="nav-ham-bar bar-3"></span>
-        </button>
-      </div>
-
-    </div>
-  </header>
-
-  <!-- Mobile Full-Screen Navigation Overlay (100vw x 100dvh) -->
-  <div id="mobileMenuOverlay" class="mobile-menu-overlay" aria-hidden="true">
-    
-    <!-- Bagian Atas: Label & Daftar 7 Menu Utama -->
-    <div class="w-full">
-      <div class="mobile-nav-label">NAVIGASI</div>
-      <nav class="mobile-nav-list flex flex-col w-full gap-1">
-        <a href="/#beranda" data-nav-key="beranda" onclick="handleNavClick('beranda', this, event)" class="mobile-nav-link" style="--item-index: 0;">
-          <div class="flex items-center gap-3">
-            <span class="mobile-nav-dot"></span>
-            <span class="mobile-nav-text">Beranda</span>
-          </div>
-          <span class="mobile-nav-index">01</span>
-        </a>
-        <a href="/#misi" data-nav-key="misi" onclick="handleNavClick('misi', this, event)" class="mobile-nav-link" style="--item-index: 1;">
-          <div class="flex items-center gap-3">
-            <span class="mobile-nav-dot"></span>
-            <span class="mobile-nav-text">Misi</span>
-          </div>
-          <span class="mobile-nav-index">02</span>
-        </a>
-        <a href="/#keunggulan" data-nav-key="keunggulan" onclick="handleNavClick('keunggulan', this, event)" class="mobile-nav-link" style="--item-index: 2;">
-          <div class="flex items-center gap-3">
-            <span class="mobile-nav-dot"></span>
-            <span class="mobile-nav-text">Keunggulan</span>
-          </div>
-          <span class="mobile-nav-index">03</span>
-        </a>
-        <a href="/#deteksi" data-nav-key="deteksi" onclick="handleNavClick('deteksi', this, event)" class="mobile-nav-link" style="--item-index: 3;">
-          <div class="flex items-center gap-3">
-            <span class="mobile-nav-dot"></span>
-            <span class="mobile-nav-text">Deteksi</span>
-          </div>
-          <span class="mobile-nav-index">04</span>
-        </a>
-        <a href="/#performa" data-nav-key="performa" onclick="handleNavClick('performa', this, event)" class="mobile-nav-link" style="--item-index: 4;">
-          <div class="flex items-center gap-3">
-            <span class="mobile-nav-dot"></span>
-            <span class="mobile-nav-text">Performa</span>
-          </div>
-          <span class="mobile-nav-index">05</span>
-        </a>
-        <a href="/#sanitasi" data-nav-key="sanitasi" onclick="handleNavClick('sanitasi', this, event)" class="mobile-nav-link" style="--item-index: 5;">
-          <div class="flex items-center gap-3">
-            <span class="mobile-nav-dot"></span>
-            <span class="mobile-nav-text">Sanitasi</span>
-          </div>
-          <span class="mobile-nav-index">06</span>
-        </a>
-        <a href="/#katalog-preview" data-nav-key="katalog" onclick="handleNavClick('katalog', this, event)" class="mobile-nav-link is-active" style="--item-index: 6;">
-          <div class="flex items-center gap-3">
-            <span class="mobile-nav-dot"></span>
-            <span class="mobile-nav-text">Katalog</span>
-          </div>
-          <span class="mobile-nav-index">07</span>
-        </a>
-      </nav>
-    </div>
-
-    <!-- Area Bawah Overlay (Footer CTA Menu) -->
-    <div class="mobile-menu-cta-group border-t border-[rgba(17,24,18,0.08)] pt-5 mt-6 flex flex-col gap-2.5 w-full" style="--item-index: 7;">
-      <a href="/deteksi" onclick="toggleMobileMenu(true)" class="mobile-menu-btn-primary">
-        <span>Mulai Deteksi Sekarang</span>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="7" y1="17" x2="17" y2="7"></line>
-          <polyline points="7 7 17 7 17 17"></polyline>
-        </svg>
-      </a>
-      <a href="/katalog-patogen" onclick="toggleMobileMenu(true)" class="mobile-menu-btn-secondary">
-        <span>Buka Katalog Patogen</span>
+{% block content %}
+  <!-- Header Editorial Ringkas (2 Kolom, Tanpa Tumpukan Pill) -->
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-gray-200/60">
+    <div>
+      <a href="/#katalog-preview" class="btn-back">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-          <polyline points="12 5 19 12 12 19"></polyline>
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
+        <span>Kembali</span>
       </a>
+      <h1 class="text-3xl sm:text-5xl font-semibold tracking-tight text-[#111812] leading-[1.12]">
+        <span class="block">Atlas Patogen</span>
+        <span class="font-serif italic font-normal text-[#163C24] block mt-1">Daun Pisang.</span>
+      </h1>
     </div>
 
+    <div class="max-w-md">
+      <p class="text-sm text-[#4B524C] leading-relaxed">
+        Eksplorasi komparatif morfologi lesi makroskopis, ambang keparahan kanopi fungsional, tindakan sanitasi mekanis (deleafing), dan panduan rotasi fungisida berstandar FRAC (Fungicide Resistance Action Committee).
+      </p>
+    </div>
   </div>
-          <polyline points="12 5 19 12 12 19"></polyline>
-        </svg>
-      </a>
-    </div>
 
+  <!-- Bar Navigasi Indeks 5 Kelas (Segmented Capsule Tabs) -->
+  <div class="mt-8 mb-8 overflow-x-auto py-1" style="scrollbar-width: none;">
+    <div class="inline-flex items-center gap-1.5 p-1.5 bg-[#F6F7F4] border border-[#E6E8E3] rounded-full min-w-max shadow-2xs" id="catalogTabsTrack">
+      <button type="button" onclick="switchPathogen('black-sigatoka')" id="tabBtn_black-sigatoka" class="catalog-tab-btn is-active">
+        <span class="catalog-tab-num">01</span>
+        <span>Sigatoka Hitam</span>
+      </button>
+      <button type="button" onclick="switchPathogen('yellow-sigatoka')" id="tabBtn_yellow-sigatoka" class="catalog-tab-btn">
+        <span class="catalog-tab-num">02</span>
+        <span>Sigatoka Kuning</span>
+      </button>
+      <button type="button" onclick="switchPathogen('cordana')" id="tabBtn_cordana" class="catalog-tab-btn">
+        <span class="catalog-tab-num">03</span>
+        <span>Bercak Cordana</span>
+      </button>
+      <button type="button" onclick="switchPathogen('pestalotiopsis')" id="tabBtn_pestalotiopsis" class="catalog-tab-btn">
+        <span class="catalog-tab-num">04</span>
+        <span>Pestalotiopsis</span>
+      </button>
+      <button type="button" onclick="switchPathogen('fresh')" id="tabBtn_fresh" class="catalog-tab-btn">
+        <span class="catalog-tab-num">05</span>
+        <span>Daun Sehat</span>
+      </button>
+    </div>
   </div>
 
-  <!-- 2. KONTEN UTAMA: ARSITEKTUR EDITORIAL SWISS-BOTANICAL (Padding-Top Lega untuk Fixed Navbar) -->
-  <main class="page-container-standalone max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 lg:pb-20">
-    
-    <!-- Header Editorial Ringkas (2 Kolom, Tanpa Tumpukan Pill) -->
-    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-gray-200/60">
-      <div>
-        <a href="/#katalog-preview" class="btn-back">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          <span>Kembali</span>
-        </a>
-        <h1 class="text-3xl sm:text-5xl font-semibold tracking-tight text-[#111812] leading-[1.12]">
-          <span class="block">Atlas Patogen</span>
-          <span class="font-serif italic font-normal text-[#163C24] block mt-1">Daun Pisang.</span>
-        </h1>
-      </div>
+  <!-- Konten Utama Dossier: Showcase Editorial Terstruktur -->
+  <div id="pathogenDossierView" class="space-y-6 transition-opacity duration-200">
 
-      <div class="max-w-md">
-        <p class="text-sm text-[#4B524C] leading-relaxed">
-          Eksplorasi komparatif morfologi lesi makroskopis, ambang keparahan kanopi fungsional, tindakan sanitasi mekanis (deleafing), dan panduan rotasi fungisida berstandar FRAC (Fungicide Resistance Action Committee).
-        </p>
-      </div>
-    </div>
+    <!-- Bagian 1: Showcase Kartu Utama (2 Kolom Desktop) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-    <!-- 3. BAR NAVIGASI INDEKS 5 KELAS (SEGMENTED CAPSULE TABS) -->
-    <div class="mt-8 mb-8 overflow-x-auto py-1" style="scrollbar-width: none;">
-      <div class="inline-flex items-center gap-1.5 p-1.5 bg-[#F6F7F4] border border-[#E6E8E3] rounded-full min-w-max shadow-2xs" id="catalogTabsTrack">
-        <button type="button" onclick="switchPathogen('black-sigatoka')" id="tabBtn_black-sigatoka" class="catalog-tab-btn is-active">
-          <span class="catalog-tab-num">01</span>
-          <span>Sigatoka Hitam</span>
-        </button>
-        <button type="button" onclick="switchPathogen('yellow-sigatoka')" id="tabBtn_yellow-sigatoka" class="catalog-tab-btn">
-          <span class="catalog-tab-num">02</span>
-          <span>Sigatoka Kuning</span>
-        </button>
-        <button type="button" onclick="switchPathogen('cordana')" id="tabBtn_cordana" class="catalog-tab-btn">
-          <span class="catalog-tab-num">03</span>
-          <span>Bercak Cordana</span>
-        </button>
-        <button type="button" onclick="switchPathogen('pestalotiopsis')" id="tabBtn_pestalotiopsis" class="catalog-tab-btn">
-          <span class="catalog-tab-num">04</span>
-          <span>Pestalotiopsis</span>
-        </button>
-        <button type="button" onclick="switchPathogen('fresh')" id="tabBtn_fresh" class="catalog-tab-btn">
-          <span class="catalog-tab-num">05</span>
-          <span>Daun Sehat</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- 4. KONTEN UTAMA DOSSIER: SHOWCASE EDITORIAL TERSTRUKTUR -->
-    <div id="pathogenDossierView" class="space-y-6 transition-opacity duration-200">
-      
-      <!-- Bagian 1: Showcase Kartu Utama (2 Kolom Desktop) -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
-        <!-- Kolom Kiri: Foto Spesimen & 4 Parameter Teknis Ringkas (lg:col-span-5) -->
-        <div class="lg:col-span-5 bg-white rounded-2xl border border-[#E5E7E2] p-4 sm:p-5 shadow-xs space-y-4">
-          <div class="aspect-[4/3] w-full rounded-xl overflow-hidden bg-[#F6F7F4] border border-[#E8ECE6] relative">
-            <img id="specimenImg" src="/static/samples/sample_black_sigatoka.jpg" alt="Foto Spesimen Daun Pisang" class="w-full h-full object-cover transition-opacity duration-300" />
-          </div>
-
-          <!-- 4 Parameter Teknis (Flat List dengan Garis Pemisah Tipis, Zero Nested Cards) -->
-          <div class="border-t border-b border-[#EEF0EC] divide-y divide-[#EEF0EC] text-sm">
-            <div class="py-2.5 flex justify-between items-center gap-3">
-              <span class="text-xs sm:text-sm font-mono text-[#4B524C]">Patogen</span>
-              <span id="specSci" class="font-serif italic text-sm sm:text-base text-[#111812] text-right truncate">Pseudocercospora fijiensis</span>
-            </div>
-            <div class="py-2.5 flex justify-between items-center gap-3">
-              <span class="text-xs sm:text-sm font-mono text-[#4B524C]">Tingkat Risiko</span>
-              <span id="specSeverity" class="font-semibold text-xs sm:text-sm text-[#991B1B] text-right truncate">Tinggi: Patogen Utama</span>
-            </div>
-            <div class="py-2.5 flex justify-between items-center gap-3">
-              <span class="text-xs sm:text-sm font-mono text-[#4B524C]">Granularitas AI</span>
-              <span id="specGranularity" class="font-medium text-xs sm:text-sm text-[#111812] text-right truncate">Lesion-Level (Deteksi Lesi)</span>
-            </div>
-            <div class="py-2.5 flex justify-between items-center gap-3">
-              <span class="text-xs sm:text-sm font-mono text-[#4B524C]">Kode FRAC</span>
-              <span id="specFrac" class="font-bold font-mono text-xs sm:text-sm text-[#163C24] text-right truncate">FRAC 3 &middot; FRAC 11 &middot; M01</span>
-            </div>
-          </div>
-
-          <!-- CTA Uji Sampel -->
-          <a href="/deteksi" class="w-full py-3.5 px-5 rounded-full bg-[#163C24] hover:bg-[#0F2A19] text-white font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition duration-200 shadow-xs">
-            <span>Uji Sampel di Detektor AI</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"></line>
-              <polyline points="7 7 17 7 17 17"></polyline>
-            </svg>
-          </a>
+      <!-- Kolom Kiri: Foto Spesimen & 4 Parameter Teknis Ringkas (lg:col-span-5) -->
+      <div class="lg:col-span-5 bg-white rounded-2xl border border-[#E5E7E2] p-4 sm:p-5 shadow-xs space-y-4">
+        <div class="aspect-[4/3] w-full rounded-xl overflow-hidden bg-[#F6F7F4] border border-[#E8ECE6] relative">
+          <img id="specimenImg" src="/static/samples/sample_black_sigatoka.jpg" alt="Foto Spesimen Daun Pisang" class="w-full h-full object-cover transition-opacity duration-300" />
         </div>
 
-        <!-- Kolom Kanan: Identitas & Gejala Lapangan (lg:col-span-7) -->
-        <div class="lg:col-span-7 space-y-4">
-          
-          <!-- Kartu Identitas & Deskripsi Singkat -->
-          <div class="bg-white rounded-2xl border border-[#E5E7E2] p-5 sm:p-6 shadow-xs space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-[#2F6B43]"></span>
-                <span class="text-xs font-mono font-bold text-[#2F6B43] uppercase tracking-wider">Spesimen Terkurasi</span>
-              </div>
-              <span id="dossierNum" class="font-mono text-xs font-bold text-[#163C24] bg-[#F4F6F2] px-2.5 py-0.5 rounded-full border border-[#E2E6DE]">01</span>
+        <!-- 4 Parameter Teknis (Flat List dengan Garis Pemisah Tipis, Zero Nested Cards) -->
+        <div class="border-t border-b border-[#EEF0EC] divide-y divide-[#EEF0EC] text-sm">
+          <div class="py-2.5 flex justify-between items-center gap-3">
+            <span class="text-xs sm:text-sm font-mono text-[#4B524C]">Patogen</span>
+            <span id="specSci" class="font-serif italic text-sm sm:text-base text-[#111812] text-right truncate">Pseudocercospora fijiensis</span>
+          </div>
+          <div class="py-2.5 flex justify-between items-center gap-3">
+            <span class="text-xs sm:text-sm font-mono text-[#4B524C]">Tingkat Risiko</span>
+            <span id="specSeverity" class="font-semibold text-xs sm:text-sm text-[#991B1B] text-right truncate">Tinggi: Patogen Utama</span>
+          </div>
+          <div class="py-2.5 flex justify-between items-center gap-3">
+            <span class="text-xs sm:text-sm font-mono text-[#4B524C]">Granularitas AI</span>
+            <span id="specGranularity" class="font-medium text-xs sm:text-sm text-[#111812] text-right truncate">Lesion-Level (Deteksi Lesi)</span>
+          </div>
+          <div class="py-2.5 flex justify-between items-center gap-3">
+            <span class="text-xs sm:text-sm font-mono text-[#4B524C]">Kode FRAC</span>
+            <span id="specFrac" class="font-bold font-mono text-xs sm:text-sm text-[#163C24] text-right truncate">FRAC 3 &middot; FRAC 11 &middot; M01</span>
+          </div>
+        </div>
+
+        <!-- CTA Uji Sampel -->
+        <a href="/deteksi" class="w-full py-3.5 px-5 rounded-full bg-[#163C24] hover:bg-[#0F2A19] text-white font-semibold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition duration-200 shadow-xs">
+          <span>Uji Sampel di Detektor AI</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Kolom Kanan: Identitas & Gejala Lapangan (lg:col-span-7) -->
+      <div class="lg:col-span-7 space-y-4">
+
+        <!-- Kartu Identitas & Deskripsi Singkat -->
+        <div class="bg-white rounded-2xl border border-[#E5E7E2] p-5 sm:p-6 shadow-xs space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#2F6B43]"></span>
+              <span class="text-xs font-mono font-bold text-[#2F6B43] uppercase tracking-wider">Spesimen Terkurasi</span>
             </div>
-            <div>
-              <h2 id="dossierTitle" class="text-2xl sm:text-3xl font-bold tracking-tight text-[#111812] leading-tight">
-                Sigatoka Hitam
-              </h2>
-              <p id="dossierSci" class="text-sm sm:text-base font-serif italic text-[#2F6B43] mt-0.5">
-                Pseudocercospora fijiensis
-              </p>
-            </div>
-            <p id="dossierShortDesc" class="text-sm sm:text-base text-[#37413A] leading-relaxed pt-3 border-t border-[#F0F2ED]">
-              Garis nekrotik hitam sejajar pertulangan daun yang cepat meluas membentuk bercak hangus terbakar, mematikan hingga 50% helai daun aktif.
+            <span id="dossierNum" class="font-mono text-xs font-bold text-[#163C24] bg-[#F4F6F2] px-2.5 py-0.5 rounded-full border border-[#E2E6DE]">01</span>
+          </div>
+          <div>
+            <h2 id="dossierTitle" class="text-2xl sm:text-3xl font-bold tracking-tight text-[#111812] leading-tight">
+              Sigatoka Hitam
+            </h2>
+            <p id="dossierSci" class="text-sm sm:text-base font-serif italic text-[#2F6B43] mt-0.5">
+              Pseudocercospora fijiensis
             </p>
           </div>
+          <p id="dossierShortDesc" class="text-sm sm:text-base text-[#37413A] leading-relaxed pt-3 border-t border-[#F0F2ED]">
+            Garis nekrotik hitam sejajar pertulangan daun yang cepat meluas membentuk bercak hangus terbakar, mematikan hingga 50% helai daun aktif.
+          </p>
+        </div>
 
-          <!-- 2 Kartu Berdampingan: Gejala Visual & Dampak Hasil Panen -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Kartu Karakteristik Gejala -->
-            <div class="bg-white rounded-2xl border border-[#E5E7E2] p-5 shadow-xs space-y-2.5 flex flex-col justify-between">
-              <div>
-                <div class="flex items-center gap-2 mb-1.5">
-                  <div class="w-6 h-6 rounded-lg bg-[#F4F6F2] text-[#163C24] flex items-center justify-center font-bold text-xs font-mono">
-                    &bull;
-                  </div>
-                  <h3 class="text-sm sm:text-base font-bold font-serif text-[#111812]">Karakteristik &amp; Gejala Visual Lapangan</h3>
+        <!-- 2 Kartu Berdampingan: Gejala Visual & Dampak Hasil Panen -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Kartu Karakteristik Gejala -->
+          <div class="bg-white rounded-2xl border border-[#E5E7E2] p-5 shadow-xs space-y-2.5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-2 mb-1.5">
+                <div class="w-6 h-6 rounded-lg bg-[#F4F6F2] text-[#163C24] flex items-center justify-center font-bold text-xs font-mono">
+                  &bull;
                 </div>
-                <p id="dossierSymptoms" class="text-sm sm:text-base text-[#37413A] leading-relaxed">
-                  Bercak garis karat cokelat kemerahan di permukaan bawah daun yang berkembang cepat menjadi bercak nekrotik hitam pekat berlubang di tengah. Daun mengering sebelum waktunya, menyebabkan tandan matang dini dan kualitas buah anjlok drastis.
-                </p>
+                <h3 class="text-sm sm:text-base font-bold font-serif text-[#111812]">Karakteristik &amp; Gejala Visual Lapangan</h3>
               </div>
-              <div class="pt-2.5 border-t border-[#F0F2ED] text-xs sm:text-sm font-mono text-[#4B524C]">
-                Fokus Pengamatan: Permukaan Lamina Bawah
-              </div>
+              <p id="dossierSymptoms" class="text-sm sm:text-base text-[#37413A] leading-relaxed">
+                Bercak garis karat cokelat kemerahan di permukaan bawah daun yang berkembang cepat menjadi bercak nekrotik hitam pekat berlubang di tengah. Daun mengering sebelum waktunya, menyebabkan tandan matang dini dan kualitas buah anjlok drastis.
+              </p>
             </div>
+            <div class="pt-2.5 border-t border-[#F0F2ED] text-xs sm:text-sm font-mono text-[#4B524C]">
+              Fokus Pengamatan: Permukaan Lamina Bawah
+            </div>
+          </div>
 
-            <!-- Kartu Dampak Panen -->
-            <div class="bg-white rounded-2xl border border-[#E5E7E2] p-5 shadow-xs space-y-2.5 flex flex-col justify-between">
-              <div>
-                <div class="flex items-center gap-2 mb-1.5">
-                  <div class="w-6 h-6 rounded-lg bg-[#FEE2E2] text-[#991B1B] flex items-center justify-center font-bold text-xs font-mono">
-                    !
-                  </div>
-                  <h3 class="text-sm sm:text-base font-bold font-serif text-[#111812]">Dampak Panen &amp; Premature Ripening</h3>
+          <!-- Kartu Dampak Panen -->
+          <div class="bg-white rounded-2xl border border-[#E5E7E2] p-5 shadow-xs space-y-2.5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-2 mb-1.5">
+                <div class="w-6 h-6 rounded-lg bg-[#FEE2E2] text-[#991B1B] flex items-center justify-center font-bold text-xs font-mono">
+                  !
                 </div>
-                <p id="dossierImpact" class="text-sm sm:text-base text-[#37413A] leading-relaxed">
-                  Penyakit jamur paling destruktif pada pisang. Menurunkan luas fotosintesis fungsional secara drastis, memicu fenomena premature ripening (buah matang terlalu awal di pohon) dengan rasa masam, dan dapat menimbulkan kerugian hasil hingga 50 sampai 100%.
-                </p>
+                <h3 class="text-sm sm:text-base font-bold font-serif text-[#111812]">Dampak Panen &amp; Premature Ripening</h3>
               </div>
-              <div class="pt-2.5 border-t border-[#F0F2ED] text-xs sm:text-sm font-mono text-[#991B1B]">
-                Risiko: Kehilangan Bobot Panen &gt; 50%
-              </div>
+              <p id="dossierImpact" class="text-sm sm:text-base text-[#37413A] leading-relaxed">
+                Penyakit jamur paling destruktif pada pisang. Menurunkan luas fotosintesis fungsional secara drastis, memicu fenomena premature ripening (buah matang terlalu awal di pohon) dengan rasa masam, dan dapat menimbulkan kerugian hasil hingga 50 sampai 100%.
+              </p>
+            </div>
+            <div class="pt-2.5 border-t border-[#F0F2ED] text-xs sm:text-sm font-mono text-[#991B1B]">
+              Risiko: Kehilangan Bobot Panen &gt; 50%
             </div>
           </div>
-
-        </div>
-
-      </div>
-
-      <!-- Bagian 2: Dua Kartu Intervensi Agronomi Lapangan (Deleafing & Rotasi FRAC) -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-        
-        <!-- Kartu 1: Deleafing -->
-        <div class="bg-white rounded-2xl border border-[#E5E7E2] p-5 sm:p-6 shadow-xs space-y-3">
-          <div class="flex items-start sm:items-center justify-between gap-2">
-            <div class="text-sm sm:text-base font-bold font-serif text-[#163C24]">Protokol Sanitasi Pemangkasan (Deleafing)</div>
-            <span class="shrink-0 whitespace-nowrap text-xs font-mono font-semibold text-[#2F6B43] bg-[#F4F6F2] px-2.5 py-0.5 rounded-full border border-[#E2E6DE]">Pengendalian Mekanis</span>
-          </div>
-          <p id="dossierDeleafing" class="text-sm sm:text-base text-[#37413A] leading-relaxed">
-            De-leafing wajib: Pangkas helai daun yang terkena lebih dari 30% area lesi, buang ke parit sanitasi dan balikkan helai daun ke bawah tanah untuk menekan pelepasan askospora spora jamur terangkat angin ke kanopi lain.
-          </p>
-          <div class="pt-3 border-t border-[#EEF0EC] flex items-center justify-between text-xs sm:text-sm text-[#4B524C] font-mono">
-            <span>Standar Kanopi</span>
-            <span class="text-[#2F6B43] font-semibold">&ge; 6 sampai 8 Daun Sehat</span>
-          </div>
-        </div>
-
-        <!-- Kartu 2: Rotasi FRAC -->
-        <div class="bg-white rounded-2xl border border-[#E5E7E2] p-5 sm:p-6 shadow-xs space-y-3">
-          <div class="flex items-start sm:items-center justify-between gap-2">
-            <div class="text-sm sm:text-base font-bold font-serif text-[#163C24]">Panduan Rotasi Fungisida (Standar FRAC)</div>
-            <span class="shrink-0 whitespace-nowrap text-xs font-mono font-semibold text-[#163C24] bg-[#F7F8F5] px-2.5 py-0.5 rounded-full border border-[#E8ECE6]">Anti-Resistensi Jamur</span>
-          </div>
-          <p id="dossierFrac" class="text-sm sm:text-base text-[#37413A] leading-relaxed">
-            Rotasi sistemik FRAC 3 (DMI Triazol: Difenoconazole / Tebuconazole) dan FRAC 11 (QoI Strobilurin: Azoxystrobin) diselingi kontak protektif FRAC M01/M03 (Mancozeb / Tembaga). Maksimal 2 kali aplikasi berturut-turut untuk mencegah resistensi patogen jamur di kebun.
-          </p>
-          <div class="pt-3 border-t border-[#EEF0EC] flex items-center justify-between text-xs sm:text-sm text-[#4B524C] font-mono">
-            <span>Ambang Aplikasi</span>
-            <span class="text-[#163C24] font-semibold">Maksimal 2x Berurutan</span>
-          </div>
         </div>
 
       </div>
 
     </div>
 
-    <!-- 5. MATRIKS KOMPARASI CEPAT 5 KELAS (TABEL EDITORIAL) -->
-    <div class="mt-20 pt-10 border-t border-[#E6E6E2]" id="komparasiTabelSection">
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
-        <div>
-          <span class="text-xs font-mono text-[#4B524C] uppercase tracking-wider block mb-1">&bull; Matriks Komparasi Cepat</span>
-          <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-[#111812]">Perbandingan 5 Kondisi <span class="font-serif italic font-normal text-[#163C24]">Daun Pisang</span></h3>
+    <!-- Bagian 2: Dua Kartu Intervensi Agronomi Lapangan (Deleafing & Rotasi FRAC) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+
+      <!-- Kartu 1: Deleafing -->
+      <div class="bg-white rounded-2xl border border-[#E5E7E2] p-5 sm:p-6 shadow-xs space-y-3">
+        <div class="flex items-start sm:items-center justify-between gap-2">
+          <div class="text-sm sm:text-base font-bold font-serif text-[#163C24]">Protokol Sanitasi Pemangkasan (Deleafing)</div>
+          <span class="shrink-0 whitespace-nowrap text-xs font-mono font-semibold text-[#2F6B43] bg-[#F4F6F2] px-2.5 py-0.5 rounded-full border border-[#E2E6DE]">Pengendalian Mekanis</span>
         </div>
-        <span class="text-xs text-[#4B524C]">Klik baris mana pun untuk menampilkan dossier detail di atas</span>
+        <p id="dossierDeleafing" class="text-sm sm:text-base text-[#37413A] leading-relaxed">
+          De-leafing wajib: Pangkas helai daun yang terkena lebih dari 30% area lesi, buang ke parit sanitasi dan balikkan helai daun ke bawah tanah untuk menekan pelepasan askospora spora jamur terangkat angin ke kanopi lain.
+        </p>
+        <div class="pt-3 border-t border-[#EEF0EC] flex items-center justify-between text-xs sm:text-sm text-[#4B524C] font-mono">
+          <span>Standar Kanopi</span>
+          <span class="text-[#2F6B43] font-semibold">&ge; 6 sampai 8 Daun Sehat</span>
+        </div>
       </div>
 
-      <!-- Petunjuk Geser Horizontal di Mobile -->
-      <div class="flex items-center gap-1.5 text-xs text-[#4B524C] sm:hidden mb-2.5 font-mono">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-        <span>Geser tabel ke samping untuk melihat seluruh parameter &rarr;</span>
+      <!-- Kartu 2: Rotasi FRAC -->
+      <div class="bg-white rounded-2xl border border-[#E5E7E2] p-5 sm:p-6 shadow-xs space-y-3">
+        <div class="flex items-start sm:items-center justify-between gap-2">
+          <div class="text-sm sm:text-base font-bold font-serif text-[#163C24]">Panduan Rotasi Fungisida (Standar FRAC)</div>
+          <span class="shrink-0 whitespace-nowrap text-xs font-mono font-semibold text-[#163C24] bg-[#F7F8F5] px-2.5 py-0.5 rounded-full border border-[#E8ECE6]">Anti-Resistensi Jamur</span>
+        </div>
+        <p id="dossierFrac" class="text-sm sm:text-base text-[#37413A] leading-relaxed">
+          Rotasi sistemik FRAC 3 (DMI Triazol: Difenoconazole / Tebuconazole) dan FRAC 11 (QoI Strobilurin: Azoxystrobin) diselingi kontak protektif FRAC M01/M03 (Mancozeb / Tembaga). Maksimal 2 kali aplikasi berturut-turut untuk mencegah resistensi patogen jamur di kebun.
+        </p>
+        <div class="pt-3 border-t border-[#EEF0EC] flex items-center justify-between text-xs sm:text-sm text-[#4B524C] font-mono">
+          <span>Ambang Aplikasi</span>
+          <span class="text-[#163C24] font-semibold">Maksimal 2x Berurutan</span>
+        </div>
       </div>
 
-      <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border-t border-b border-[#E6E6E2] py-2">
-        <table class="w-full text-left text-sm border-collapse min-w-[720px]">
-          <thead class="border-b border-[#E6E6E2] text-[#4B524C] font-mono uppercase text-xs">
-            <tr>
-              <th class="py-3 px-3.5 font-semibold min-w-[155px]">Kondisi Daun</th>
-              <th class="py-3 px-3.5 font-semibold min-w-[210px]">Ciri Visual Utama</th>
-              <th class="py-3 px-3.5 font-semibold min-w-[145px]">Risiko</th>
-              <th class="py-3 px-3.5 font-semibold min-w-[180px]">Tindakan Deleafing</th>
-              <th class="py-3 px-3.5 font-semibold min-w-[140px]">Kode FRAC</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[#E6E6E2]" id="comparisonTableBody">
-            
-            <!-- Row 1: Sigatoka Hitam -->
-            <tr class="comp-row is-active" id="compRow_black-sigatoka" onclick="switchPathogen('black-sigatoka', true)">
-              <td class="py-3.5 px-3.5 font-bold text-[#111812] whitespace-nowrap">
-                <span class="font-mono text-[#4B524C] mr-1.5 font-normal">01</span>
-                <span>Sigatoka Hitam</span>
-                <span class="block text-xs sm:text-sm font-serif italic font-normal text-[#4B524C]">Pseudocercospora fijiensis</span>
-              </td>
-              <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Garis nekrotik hitam sejajar tulang daun yang cepat meluas hangus</td>
-              <td class="py-3.5 px-3.5 font-semibold text-[#111812] whitespace-nowrap">Tinggi: Patogen Utama</td>
-              <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Pangkas helai jika lesi &gt; 30%, balik ke tanah</td>
-              <td class="py-3.5 px-3.5 font-mono text-[#163C24] font-semibold whitespace-nowrap">FRAC 3 &middot; FRAC 11 &middot; M01</td>
-            </tr>
-
-            <!-- Row 2: Sigatoka Kuning -->
-            <tr class="comp-row" id="compRow_yellow-sigatoka" onclick="switchPathogen('yellow-sigatoka', true)">
-              <td class="py-3.5 px-3.5 font-bold text-[#111812] whitespace-nowrap">
-                <span class="font-mono text-[#4B524C] mr-1.5 font-normal">02</span>
-                <span>Sigatoka Kuning</span>
-                <span class="block text-xs sm:text-sm font-serif italic font-normal text-[#4B524C]">Pseudocercospora musae</span>
-              </td>
-              <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Bercak oval pusat abu-abu dikelilingi cincin klorosis kuning pekat</td>
-              <td class="py-3.5 px-3.5 font-semibold text-[#111812] whitespace-nowrap">Moderat: Jamur Daun</td>
-              <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Sanitasi daun tua bawah, perbaiki aerasi</td>
-              <td class="py-3.5 px-3.5 font-mono text-[#163C24] font-semibold whitespace-nowrap">FRAC 3 &middot; M01 &middot; M03</td>
-            </tr>
-
-            <!-- Row 3: Bercak Cordana -->
-            <tr class="comp-row" id="compRow_cordana" onclick="switchPathogen('cordana', true)">
-              <td class="py-3.5 px-3.5 font-bold text-[#111812] whitespace-nowrap">
-                <span class="font-mono text-[#4B524C] mr-1.5 font-normal">03</span>
-                <span>Bercak Cordana</span>
-                <span class="block text-xs sm:text-sm font-serif italic font-normal text-[#4B524C]">Cordana musae</span>
-              </td>
-              <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Bercak oval konsentris berdiameter 1-3 cm dengan pola target spot</td>
-              <td class="py-3.5 px-3.5 font-semibold text-[#111812] whitespace-nowrap">Sekunder: Infeksi Luka</td>
-              <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Pangkas bagian helai terinfeksi di bawah kanopi</td>
-              <td class="py-3.5 px-3.5 font-mono text-[#163C24] font-semibold whitespace-nowrap">FRAC M01 &middot; M03 (Protektif)</td>
-            </tr>
-
-            <!-- Row 4: Pestalotiopsis -->
-            <tr class="comp-row" id="compRow_pestalotiopsis" onclick="switchPathogen('pestalotiopsis', true)">
-              <td class="py-3.5 px-3.5 font-bold text-[#111812] whitespace-nowrap">
-                <span class="font-mono text-[#4B524C] mr-1.5 font-normal">04</span>
-                <span>Pestalotiopsis</span>
-                <span class="block text-xs sm:text-sm font-serif italic font-normal text-[#4B524C]">Pestalotiopsis spp.</span>
-              </td>
-              <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Nekrosis abu-abu dengan bintik acervuli hitam pada sobekan helai daun</td>
-              <td class="py-3.5 px-3.5 font-semibold text-[#111812] whitespace-nowrap">Tepi Daun: Nekrosis Angin</td>
-              <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Pangkas helai daun robek yang mengering parah</td>
-              <td class="py-3.5 px-3.5 font-mono text-[#163C24] font-semibold whitespace-nowrap">FRAC M03 &middot; FRAC M05</td>
-            </tr>
-
-            <!-- Row 5: Daun Sehat -->
-            <tr class="comp-row" id="compRow_fresh" onclick="switchPathogen('fresh', true)">
-              <td class="py-3.5 px-3.5 font-bold text-[#111812] whitespace-nowrap">
-                <span class="font-mono text-[#4B524C] mr-1.5 font-normal">05</span>
-                <span>Daun Sehat</span>
-                <span class="block text-xs sm:text-sm font-serif italic font-normal text-[#4B524C]">Musa spp.</span>
-              </td>
-              <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Lamina hijau segar merata, tanpa bercak nekrotik atau klorotik</td>
-              <td class="py-3.5 px-3.5 font-semibold text-[#2F6B43] whitespace-nowrap">Optimal: Kanopi Sehat</td>
-              <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Pertahankan 6-8 daun aktif sehat hingga waktu panen</td>
-              <td class="py-3.5 px-3.5 font-mono text-[#2F6B43] font-semibold whitespace-nowrap">Bebas Fungisida Kimia</td>
-            </tr>
-
-          </tbody>
-        </table>
-      </div>
     </div>
 
-  </main>
+  </div>
 
-  <!-- 6. FLOATING WHITE FOOTER CARD (SERAGAM DENGAN INDEX.HTML) -->
-  <footer class="section-prefooter mt-16" style="background-image: url('/static/samples/musavision_hero_bg.jpg');">
-    <div class="prefooter-gradient-scrim"></div>
-    <div class="floating-footer-card">
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-8 pb-8 border-b border-[#E6E6E2]">
-        
-        <!-- Kolom 1: Logo & Misi -->
-        <div class="md:col-span-5 space-y-3">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-[#DDF247] text-[#111812] font-bold flex items-center justify-center shadow-sm">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
-                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
-              </svg>
-            </div>
-            <span class="text-xl font-bold tracking-tight text-[#111812]">MusaVision</span>
-          </div>
-          <p class="text-xs text-[#4B524C] leading-relaxed max-w-sm">
-            Platform kecerdasan buatan berbasis YOLO26n dan adaptasi kontras CIE-LAB CLAHE untuk deteksi presisi 5 kondisi daun pisang serta panduan rotasi fungisida berstandar FRAC.
-          </p>
-          <div class="pt-1">
-            <a href="mailto:kontak@musavision.id" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F6F7F4] hover:bg-slate-200 border border-[#E6E6E2] text-xs font-mono text-[#111812] transition">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect width="20" height="16" x="2" y="4" rx="2"></rect>
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-              </svg>
-              <span>kontak@musavision.id</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Kolom 2: Navigasi Cepat -->
-        <div class="md:col-span-2 space-y-2.5">
-          <div class="text-xs font-mono font-bold text-[#111812] uppercase tracking-wider">Navigasi</div>
-          <ul class="space-y-2 text-xs text-[#4B524C]">
-            <li><a href="/#beranda" class="hover:text-[#163C24] transition">Beranda</a></li>
-            <li><a href="/#misi" class="hover:text-[#163C24] transition">Misi &amp; Nilai</a></li>
-            <li><a href="/#keunggulan" class="hover:text-[#163C24] transition">Keunggulan</a></li>
-            <li><a href="/deteksi" class="hover:text-[#163C24] transition">Deteksi AI</a></li>
-            <li><a href="/#performa" class="hover:text-[#163C24] transition">Validasi Performa</a></li>
-            <li><a href="/#sanitasi" class="hover:text-[#163C24] transition">Sanitasi Kebun</a></li>
-            <li><a href="/katalog-patogen" class="hover:text-[#163C24] transition font-semibold text-[#163C24]">Katalog Patogen</a></li>
-            <li><a href="/#faq-section" class="hover:text-[#163C24] transition">FAQ Petani</a></li>
-          </ul>
-        </div>
-
-        <!-- Kolom 3: Solusi Fitur -->
-        <div class="md:col-span-3 space-y-2.5">
-          <div class="text-xs font-mono font-bold text-[#111812] uppercase tracking-wider">Teknologi &amp; Fitur</div>
-          <ul class="space-y-2 text-xs text-[#4B524C]">
-            <li><span class="font-medium text-[#111812]">YOLO26 Nano:</span> 2,39M Parameter</li>
-            <li><span class="font-medium text-[#111812]">CIE-LAB CLAHE:</span> Penajaman L-Channel</li>
-            <li><span class="font-medium text-[#111812]">Gatekeeper:</span> Filter Anti Objek Asing</li>
-            <li><span class="font-medium text-[#111812]">Standar FRAC:</span> Rotasi Bahan Aktif</li>
-            <li><span class="font-medium text-[#111812]">Deleafing:</span> Menjaga 6-8 Daun</li>
-          </ul>
-        </div>
-
-        <!-- Kolom 4: Riset Skripsi -->
-        <div class="md:col-span-2 space-y-2.5">
-          <div class="text-xs font-mono font-bold text-[#111812] uppercase tracking-wider">Riset Akademik</div>
-          <ul class="space-y-2 text-xs text-[#4B524C]">
-            <li>Skripsi Visi Komputer</li>
-            <li>YOLO26n + CIE-LAB</li>
-            <li>Akurasi 85.34% mAP@50</li>
-            <li>Basis Data IndexedDB</li>
-          </ul>
-        </div>
-
+  <!-- Matriks Komparasi Cepat 5 Kelas (Tabel Editorial) -->
+  <div class="mt-20 pt-10 border-t border-[#E6E6E2]" id="komparasiTabelSection">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
+      <div>
+        <span class="text-xs font-mono text-[#4B524C] uppercase tracking-wider block mb-1">&bull; Matriks Komparasi Cepat</span>
+        <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-[#111812]">Perbandingan 5 Kondisi <span class="font-serif italic font-normal text-[#163C24]">Daun Pisang</span></h3>
       </div>
-
-      <!-- Copyright Row -->
-      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#4B524C]">
-        <div>&copy; 2026 MusaVision. Hak Cipta Dilindungi Undang-Undang.</div>
-        <div class="flex items-center gap-4">
-          <a href="/#beranda" class="hover:text-[#111812] transition">Beranda</a>
-          <span>&middot;</span>
-          <a href="/deteksi" class="hover:text-[#111812] transition">Deteksi</a>
-          <span>&middot;</span>
-          <a href="/katalog-patogen" class="hover:text-[#111812] transition">Katalog</a>
-          <span>&middot;</span>
-          <a href="/#faq-section" class="hover:text-[#111812] transition">FAQ</a>
-        </div>
-      </div>
+      <span class="text-xs text-[#4B524C]">Klik baris mana pun untuk menampilkan dossier detail di atas</span>
     </div>
-  </footer>
 
-  <!-- DATA & INTERAKTIVITAS ARSITEKTUR EDITORIAL -->
-  <script>
-    const DOSSIER_DATA = {
-      "black-sigatoka": {
-        num: "01",
-        title: "Sigatoka Hitam",
-        sci: "Pseudocercospora fijiensis",
-        severity: "Tinggi: Patogen Utama",
-        granularity: "Lesion-Level (Deteksi Lesi)",
-        fracCode: "FRAC 3 · FRAC 11 · M01",
-        img: "/static/samples/sample_black_sigatoka.jpg",
-        shortDesc: "Garis nekrotik hitam sejajar pertulangan daun yang cepat meluas membentuk bercak hangus terbakar, mematikan hingga 50% helai daun aktif.",
-        symptoms: "Bercak garis karat cokelat kemerahan di permukaan bawah daun yang berkembang cepat menjadi bercak nekrotik hitam pekat berlubang di tengah. Daun mengering sebelum waktunya, menyebabkan tandan matang dini dan kualitas buah anjlok drastis.",
-        impact: "Penyakit jamur paling destruktif pada pisang. Menurunkan luas fotosintesis fungsional secara drastis, memicu fenomena premature ripening (buah matang terlalu awal di pohon) dengan rasa masam, dan dapat menimbulkan kerugian hasil hingga 50 sampai 100%.",
-        deleafing: "De-leafing wajib: Pangkas helai daun yang terkena lebih dari 30% area lesi, buang ke parit sanitasi dan balikkan helai daun ke bawah tanah untuk menekan pelepasan askospora spora jamur terangkat angin ke kanopi lain.",
-        frac: "Rotasi sistemik FRAC 3 (DMI Triazol: Difenoconazole / Tebuconazole) dan FRAC 11 (QoI Strobilurin: Azoxystrobin) diselingi kontak protektif FRAC M01/M03 (Mancozeb / Tembaga). Maksimal 2 kali aplikasi berturut-turut untuk mencegah resistensi patogen jamur di kebun."
-      },
-      "yellow-sigatoka": {
-        num: "02",
-        title: "Sigatoka Kuning",
-        sci: "Pseudocercospora musae",
-        severity: "Moderat: Jamur Daun",
-        granularity: "Lesion-Level (Deteksi Lesi)",
-        fracCode: "FRAC 3 · M01 · M03",
-        img: "/static/samples/sample_yellow_sigatoka.jpg",
-        shortDesc: "Bercak garis kuning kehijauan yang meluas dengan pusat lesi abu-abu dikelilingi batas halo klorotik kuning pekat khas.",
-        symptoms: "Bercak kuning memanjang searah tulang rusuk daun, lambat laun membesar menjadi bercak oval dengan bagian tengah abu-abu kering bertepi cokelat tua. Memiliki cincin klorosis kuning yang sangat kontras.",
-        impact: "Menghambat perkembangan kanopi fotosintesis pada fase vegetatif. Jika infeksi terjadi pada awal pembungaan, jumlah sisir pada tandan buah akan berkurang secara signifikan.",
-        deleafing: "Sanitasi helai daun bawah yang tua atau mulai menguning. Perbaiki drainase parit kebun untuk menurunkan kelembapan relatif mikroklimat tanah.",
-        frac: "Semprot fungisida protektif berbahan aktif tembaga (FRAC M01) atau dithiocarbamate (FRAC M03). Rotasikan dengan FRAC 3 triazol pada musim hujan intensitas tinggi."
-      },
-      "cordana": {
-        num: "03",
-        title: "Bercak Cordana",
-        sci: "Cordana musae",
-        severity: "Sekunder: Infeksi Luka",
-        granularity: "Lesion-Level (Deteksi Lesi)",
-        fracCode: "FRAC M01 · M03 (Protektif)",
-        img: "/static/samples/sample_cordana.jpg",
-        shortDesc: "Bercak oval konsentris berdiameter 1-3 cm dengan tepi cokelat gelap dan lingkaran halo kuning khas di sekeliling lesi.",
-        symptoms: "Lesi oval atau melingkar dengan pola cincin konsentris (target spot). Pusat lesi mengering menjadi abu-abu kecokelatan dengan batas halo klorotik kuning cerah. Sering muncul pada daun yang terlindung atau berada di bawah kanopi lembap.",
-        impact: "Bersifat patogen sekunder atau oportunistik yang biasanya menyerang jaringan daun yang telah mengalami stres lingkungan atau luka mekanis akibat gesekan angin.",
-        deleafing: "Sanitasi pangkas tepi helai daun fungsional yang terinfeksi di bawah kanopi aktif. Bakar atau kubur sisa pangkasan dan pastikan kebersihan pisau sanitasi dengan disinfeksi.",
-        frac: "Fungisida kontak protektif mancozeb/chlorothalonil (FRAC M03/M05) dikombinasikan dengan perbaikan aerasi kebun. Umumnya tidak memerlukan fungisida sistemik berbiaya tinggi."
-      },
-      "pestalotiopsis": {
-        num: "04",
-        title: "Pestalotiopsis",
-        sci: "Pestalotiopsis spp.",
-        severity: "Tepi Daun: Nekrosis Angin",
-        granularity: "Lesion-Level (Deteksi Lesi)",
-        fracCode: "FRAC M03 · FRAC M05",
-        img: "/static/samples/sample_pestalotiopsis.jpg",
-        shortDesc: "Lesi nekrotik abu-abu dengan titik hitam (acervuli) sporulasi jamur, sering berawal dari tepi helai daun yang robek akibat terpaan angin kencang.",
-        symptoms: "Bercak nekrotik tidak teratur dengan bagian tengah memutih atau abu-abu pucat. Terlihat titik-titik hitam kecil (acervuli) di permukaan bercak saat diamati dari dekat. Sering menginfeksi jaringan daun yang robek akibat angin kencang.",
-        impact: "Menyebabkan robekan helai daun mengering dan mati sebelum waktunya. Menurunkan ketahanan mekanis helaian daun pisang terhadap hembusan angin kebun berikutnya.",
-        deleafing: "Pangkas helai daun yang terinfeksi berat. Hindari luka mekanis pada helai daun muda dan kurangi gesekan antar pelepah dengan pengaturan jarak tanam teratur.",
-        frac: "Aplikasi fungisida mancozeb (FRAC M03) atau klorotalonil (FRAC M05). Hindari pemupukan nitrogen berlebih yang menyebabkan jaringan lamina daun terlalu sukulen dan mudah koyak."
-      },
-      "fresh": {
-        num: "05",
-        title: "Daun Sehat",
-        sci: "Musa spp.",
-        severity: "Optimal: Kanopi Sehat",
-        granularity: "Leaf-Level (Deteksi Daun)",
-        fracCode: "Bebas Fungisida Kimia",
-        img: "/static/samples/sample_fresh.jpg",
-        shortDesc: "Jaringan helai daun hijau segar optimal tanpa lesi nekrotik, mendukung fotosintesis penuh pengisian tandan buah pisang.",
-        symptoms: "Permukaan helaian daun hijau merata, lamina daun utuh, pertulangan daun kokoh tanpa bercak klorotik atau lesi nekrotik. Indikator kanopi fotosintesis produktif prima.",
-        impact: "Kondisi ideal kebun. Setiap 1 helai daun fungsional sehat mendukung pertambahan bobot buah dan menjamin pengisian nutrisi tandan pisang hingga panen optimal.",
-        deleafing: "Pertahankan minimal 8 sampai 10 helai daun fungsional per rumpun saat fase vegetatif dan minimal 6 sampai 8 daun aktif sehat saat pembentukan tandan buah hingga waktu panen tiba.",
-        frac: "Tidak memerlukan aplikasi fungisida kuratif apapun. Lanjutkan pemupukan berimbang (NPK + Silika) serta pemeliharaan sanitasi gulma rutin di sekitar piringan pohon."
-      }
-    };
+    <!-- Petunjuk Geser Horizontal di Mobile -->
+    <div class="flex items-center gap-1.5 text-xs text-[#4B524C] sm:hidden mb-2.5 font-mono">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+      <span>Geser tabel ke samping untuk melihat seluruh parameter &rarr;</span>
+    </div>
 
-    // Normalisasi parameter kunci
-    function normalizeKey(key) {
-      if (!key) return "black-sigatoka";
-      const clean = key.toLowerCase().replace(/_/g, "-");
-      if (clean === "healthy") return "fresh";
-      if (DOSSIER_DATA[clean]) return clean;
-      return "black-sigatoka";
-    }
+    <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border-t border-b border-[#E6E6E2] py-2">
+      <table class="w-full text-left text-sm border-collapse min-w-[720px]">
+        <thead class="border-b border-[#E6E6E2] text-[#4B524C] font-mono uppercase text-xs">
+          <tr>
+            <th class="py-3 px-3.5 font-semibold min-w-[155px]">Kondisi Daun</th>
+            <th class="py-3 px-3.5 font-semibold min-w-[210px]">Ciri Visual Utama</th>
+            <th class="py-3 px-3.5 font-semibold min-w-[145px]">Risiko</th>
+            <th class="py-3 px-3.5 font-semibold min-w-[180px]">Tindakan Deleafing</th>
+            <th class="py-3 px-3.5 font-semibold min-w-[140px]">Kode FRAC</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#E6E6E2]" id="comparisonTableBody">
 
-    function switchPathogen(rawKey, scrollToTop = false) {
-      const key = normalizeKey(rawKey);
-      const data = DOSSIER_DATA[key];
-      if (!data) return;
+          <!-- Row 1: Sigatoka Hitam -->
+          <tr class="comp-row is-active" id="compRow_black-sigatoka" onclick="switchPathogen('black-sigatoka', true)">
+            <td class="py-3.5 px-3.5 font-bold text-[#111812] whitespace-nowrap">
+              <span class="font-mono text-[#4B524C] mr-1.5 font-normal">01</span>
+              <span>Sigatoka Hitam</span>
+              <span class="block text-xs sm:text-sm font-serif italic font-normal text-[#4B524C]">Pseudocercospora fijiensis</span>
+            </td>
+            <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Garis nekrotik hitam sejajar tulang daun yang cepat meluas hangus</td>
+            <td class="py-3.5 px-3.5 font-semibold text-[#111812] whitespace-nowrap">Tinggi: Patogen Utama</td>
+            <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Pangkas helai jika lesi &gt; 30%, balik ke tanah</td>
+            <td class="py-3.5 px-3.5 font-mono text-[#163C24] font-semibold whitespace-nowrap">FRAC 3 &middot; FRAC 11 &middot; M01</td>
+          </tr>
 
-      // 1. Update status tombol tab indeks
-      document.querySelectorAll(".catalog-tab-btn").forEach(btn => {
-        btn.classList.remove("is-active");
-      });
-      const activeTab = document.getElementById("tabBtn_" + key);
-      if (activeTab) {
-        activeTab.classList.add("is-active");
-        activeTab.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-      }
+          <!-- Row 2: Sigatoka Kuning -->
+          <tr class="comp-row" id="compRow_yellow-sigatoka" onclick="switchPathogen('yellow-sigatoka', true)">
+            <td class="py-3.5 px-3.5 font-bold text-[#111812] whitespace-nowrap">
+              <span class="font-mono text-[#4B524C] mr-1.5 font-normal">02</span>
+              <span>Sigatoka Kuning</span>
+              <span class="block text-xs sm:text-sm font-serif italic font-normal text-[#4B524C]">Pseudocercospora musae</span>
+            </td>
+            <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Bercak oval pusat abu-abu dikelilingi cincin klorosis kuning pekat</td>
+            <td class="py-3.5 px-3.5 font-semibold text-[#111812] whitespace-nowrap">Moderat: Jamur Daun</td>
+            <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Sanitasi daun tua bawah, perbaiki aerasi</td>
+            <td class="py-3.5 px-3.5 font-mono text-[#163C24] font-semibold whitespace-nowrap">FRAC 3 &middot; M01 &middot; M03</td>
+          </tr>
 
-      // 2. Update status baris tabel komparasi
-      document.querySelectorAll(".comp-row").forEach(row => {
-        row.classList.remove("is-active");
-      });
-      const activeRow = document.getElementById("compRow_" + key);
-      if (activeRow) {
-        activeRow.classList.add("is-active");
-      }
+          <!-- Row 3: Bercak Cordana -->
+          <tr class="comp-row" id="compRow_cordana" onclick="switchPathogen('cordana', true)">
+            <td class="py-3.5 px-3.5 font-bold text-[#111812] whitespace-nowrap">
+              <span class="font-mono text-[#4B524C] mr-1.5 font-normal">03</span>
+              <span>Bercak Cordana</span>
+              <span class="block text-xs sm:text-sm font-serif italic font-normal text-[#4B524C]">Cordana musae</span>
+            </td>
+            <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Bercak oval konsentris berdiameter 1-3 cm dengan pola target spot</td>
+            <td class="py-3.5 px-3.5 font-semibold text-[#111812] whitespace-nowrap">Sekunder: Infeksi Luka</td>
+            <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Pangkas bagian helai terinfeksi di bawah kanopi</td>
+            <td class="py-3.5 px-3.5 font-mono text-[#163C24] font-semibold whitespace-nowrap">FRAC M01 &middot; M03 (Protektif)</td>
+          </tr>
 
-      // 3. Update konten dossier
-      const dossierView = document.getElementById("pathogenDossierView");
-      if (dossierView) {
-        dossierView.style.opacity = "0.4";
-        setTimeout(() => {
-          document.getElementById("specimenImg").src = data.img;
-          document.getElementById("specSci").textContent = data.sci;
-          document.getElementById("specSeverity").textContent = data.severity;
-          document.getElementById("specGranularity").textContent = data.granularity;
-          document.getElementById("specFrac").textContent = data.fracCode;
+          <!-- Row 4: Pestalotiopsis -->
+          <tr class="comp-row" id="compRow_pestalotiopsis" onclick="switchPathogen('pestalotiopsis', true)">
+            <td class="py-3.5 px-3.5 font-bold text-[#111812] whitespace-nowrap">
+              <span class="font-mono text-[#4B524C] mr-1.5 font-normal">04</span>
+              <span>Pestalotiopsis</span>
+              <span class="block text-xs sm:text-sm font-serif italic font-normal text-[#4B524C]">Pestalotiopsis spp.</span>
+            </td>
+            <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Nekrosis abu-abu dengan bintik acervuli hitam pada sobekan helai daun</td>
+            <td class="py-3.5 px-3.5 font-semibold text-[#111812] whitespace-nowrap">Tepi Daun: Nekrosis Angin</td>
+            <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Pangkas helai daun robek yang mengering parah</td>
+            <td class="py-3.5 px-3.5 font-mono text-[#163C24] font-semibold whitespace-nowrap">FRAC M03 &middot; FRAC M05</td>
+          </tr>
 
-          document.getElementById("dossierNum").textContent = data.num;
-          document.getElementById("dossierTitle").textContent = data.title;
-          document.getElementById("dossierSci").textContent = data.sci;
-          document.getElementById("dossierShortDesc").textContent = data.shortDesc;
+          <!-- Row 5: Daun Sehat -->
+          <tr class="comp-row" id="compRow_fresh" onclick="switchPathogen('fresh', true)">
+            <td class="py-3.5 px-3.5 font-bold text-[#111812] whitespace-nowrap">
+              <span class="font-mono text-[#4B524C] mr-1.5 font-normal">05</span>
+              <span>Daun Sehat</span>
+              <span class="block text-xs sm:text-sm font-serif italic font-normal text-[#4B524C]">Musa spp.</span>
+            </td>
+            <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Lamina hijau segar merata, tanpa bercak nekrotik atau klorotik</td>
+            <td class="py-3.5 px-3.5 font-semibold text-[#2F6B43] whitespace-nowrap">Optimal: Kanopi Sehat</td>
+            <td class="py-3.5 px-3.5 text-[#37413A] leading-relaxed">Pertahankan 6-8 daun aktif sehat hingga waktu panen</td>
+            <td class="py-3.5 px-3.5 font-mono text-[#2F6B43] font-semibold whitespace-nowrap">Bebas Fungisida Kimia</td>
+          </tr>
 
-          document.getElementById("dossierSymptoms").textContent = data.symptoms;
-          document.getElementById("dossierImpact").textContent = data.impact;
-          document.getElementById("dossierDeleafing").textContent = data.deleafing;
-          document.getElementById("dossierFrac").textContent = data.frac;
-
-          // Perbarui query param tanpa me-refresh halaman
-          const newUrl = window.location.pathname + "?kelas=" + encodeURIComponent(key);
-          window.history.replaceState({ kelas: key }, "", newUrl);
-
-          dossierView.style.opacity = "1";
-
-          if (scrollToTop) {
-            dossierView.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-        }, 100);
-      }
-    }
-
-    // Toggle menu mobile untuk halaman katalog dengan animasi morphing
-    function toggleKatalogMobileMenu(forceClose = false) {
-      const drawer = document.getElementById("katalogMobileDrawer");
-      const btn = document.getElementById("katalogHamburgerBtn");
-      const navbar = document.getElementById("mainNavbar");
-      if (!drawer || !btn) return;
-
-      const isOpen = btn.classList.contains("is-open");
-      const shouldClose = forceClose || isOpen;
-
-      if (shouldClose) {
-        drawer.classList.remove("is-open");
-        btn.classList.remove("is-open");
-        btn.setAttribute("aria-expanded", "false");
-        if (navbar) navbar.classList.remove("drawer-open");
-      } else {
-        drawer.classList.add("is-open");
-        btn.classList.add("is-open");
-        btn.setAttribute("aria-expanded", "true");
-        if (navbar) navbar.classList.add("drawer-open");
-      }
-    }
-    window.toggleKatalogMobileMenu = toggleKatalogMobileMenu;
-
-    // Tutup drawer katalog saat klik di luar atau tombol Escape
-    document.addEventListener("click", (e) => {
-      const drawer = document.getElementById("katalogMobileDrawer");
-      const btn = document.getElementById("katalogHamburgerBtn");
-      if (drawer && btn && btn.classList.contains("is-open") && !drawer.contains(e.target) && !btn.contains(e.target)) {
-        toggleKatalogMobileMenu(true);
-      }
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        toggleKatalogMobileMenu(true);
-      }
-    });
-
-    // Inisialisasi saat halaman dimuat
-    document.addEventListener("DOMContentLoaded", () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const requested = urlParams.get("kelas") || urlParams.get("penyakit") || "black-sigatoka";
-      switchPathogen(requested);
-    });
-  </script>
-</body>
-</html>
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

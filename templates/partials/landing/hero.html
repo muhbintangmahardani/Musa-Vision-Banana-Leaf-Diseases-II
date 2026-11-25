@@ -1,0 +1,74 @@
+<section id="beranda" class="hero-editorial w-full h-screen h-[100dvh] md:h-screen relative overflow-hidden m-0 p-0 flex flex-col justify-between">
+  <div class="hero-slideshow-container absolute inset-0 w-full h-full m-0 p-0 overflow-hidden pointer-events-none">
+    <div id="heroSlide0" class="hero-slide active w-full h-full absolute inset-0 m-0 p-0">
+      <img src="/static/samples/musavision_hero_bg.jpg" alt="MusaVision Hero Background" class="object-cover object-center w-full h-full block m-0 p-0" fetchpriority="high" />
+    </div>
+    <div id="heroSlide1" class="hero-slide w-full h-full absolute inset-0 m-0 p-0">
+      <img src="/static/samples/pillar_canopy_management.jpg" alt="Manajemen Kanopi Kebun Pisang" class="object-cover object-center w-full h-full block m-0 p-0" />
+    </div>
+    <div id="heroSlide2" class="hero-slide w-full h-full absolute inset-0 m-0 p-0">
+      <img src="/static/samples/pillar_frac_spraying.jpg" alt="Penyemprotan Fungisida FRAC" class="object-cover object-center w-full h-full block m-0 p-0" />
+    </div>
+  </div>
+
+  <div class="hero-scrim hero-overlay"></div>
+
+  <div class="hero-inner w-full flex-grow flex flex-col justify-between pt-20 sm:pt-28 lg:pt-36 pb-5 sm:pb-6">
+    <div class="hero-content-block">
+      <h1 id="heroHeadline" data-reveal="words" class="hero-title text-4xl sm:text-6xl lg:text-[72px] font-normal tracking-[-0.025em] text-white leading-[1.1] max-w-4xl">
+        <span class="block">Deteksi Cerdas untuk</span>
+        <span class="block mt-1 sm:mt-2">
+          <span>Kebun </span><span class="font-serif italic font-normal tracking-normal text-[#E2F0D9]">Pisang</span>
+        </span>
+      </h1>
+
+      <p class="hero-subdesc hero-subtitle text-base sm:text-lg text-white/95 font-normal max-w-xl max-w-[55ch] mt-3 sm:mt-4 leading-relaxed">
+        Kenali bercak daun sejak dini, jaga 6-8 daun sehat, dan atur rotasi fungisida terstandar.
+      </p>
+
+      <div class="hero-cta-group mt-4 sm:mt-8">
+        <a href="/deteksi" class="hero-btn-lime">
+          <span>Mulai Deteksi</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </a>
+        <a href="#sanitasi" class="hero-btn-outline">
+          <span>Panduan Sanitasi</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-bottom-wrapper w-full">
+      <div class="hero-slide-nav-top flex justify-end mb-2.5">
+        <div class="hero-pagination">
+          <span id="heroSlideCounter" class="hidden md:inline-block text-white/80 font-normal tracking-wider text-xs font-sans">01 / 03</span>
+          <div class="flex items-center gap-1.5" id="heroSlideDots">
+            <button type="button" onclick="goToHeroSlide(0)" class="hero-dot active" aria-label="Slide 1"></button>
+            <button type="button" onclick="goToHeroSlide(1)" class="hero-dot" aria-label="Slide 2"></button>
+            <button type="button" onclick="goToHeroSlide(2)" class="hero-dot" aria-label="Slide 3"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-bottom-bar">
+        <a href="#misi" class="hero-bottom-scroll">
+          <span>SCROLL</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <polyline points="19 12 12 19 5 12"></polyline>
+          </svg>
+        </a>
+
+        <div class="hero-bottom-metric-mid font-mono">
+          <span>85.34% mAP@50</span>
+        </div>
+
+        <div class="hero-bottom-metric-right font-mono">
+          <span>5 Kelas Patologi</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

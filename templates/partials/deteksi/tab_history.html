@@ -1,0 +1,47 @@
+<!-- VIEW 4: Riwayat Lapangan (IndexedDB) -->
+<div id="tabViewHistory" class="hidden space-y-4">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E8EAE6]">
+    <div>
+      <h3 class="text-sm font-bold text-[#111812]">Log Riwayat Pengujian Lapangan</h3>
+      <p class="text-xs text-[#4B524C]">Tersimpan persisten di IndexedDB peramban Anda</p>
+    </div>
+    <div class="history-actions-bar grid grid-cols-2 sm:flex items-center gap-2.5 w-full sm:w-auto">
+      <button id="btnExportCsv" type="button" onclick="exportHistoryCsv()" class="w-full sm:w-auto px-4 py-2.5 rounded-full bg-[#163C24] hover:bg-[#0F2A19] text-white text-xs font-semibold transition shadow-xs inline-flex items-center justify-center gap-1.5 min-h-[42px]">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Ekspor CSV</span>
+      </button>
+      <button id="btnClearHistory" type="button" onclick="clearDetectionHistory()" class="btn-clear-history w-full sm:w-auto px-4 py-2.5 rounded-full bg-white hover:bg-slate-50 text-[#111812] text-xs font-medium border border-[#D8DCD5] transition inline-flex items-center justify-center min-h-[42px]">
+        Bersihkan
+      </button>
+    </div>
+  </div>
+
+  <!-- Tampilan Desktop (>= 768px): Tabel Horizontal Lengkap -->
+  <div class="hidden md:block w-full overflow-x-auto rounded-xl border border-[#E5E7E2] bg-white p-2 sm:p-3">
+    <table class="w-full text-left border-collapse text-xs min-w-[650px]">
+      <thead>
+        <tr class="border-b border-[#E8EAE6] bg-[#F6F7F4] text-[#4B524C] font-semibold">
+          <th class="py-2.5 px-3">Citra</th>
+          <th class="py-2.5 px-3">Waktu</th>
+          <th class="py-2.5 px-3">Nama Berkas</th>
+          <th class="py-2.5 px-3">Vonis Diagnosa</th>
+          <th class="py-2.5 px-3 text-center">Lesi</th>
+          <th class="py-2.5 px-3">Latensi</th>
+          <th class="py-2.5 px-3 text-right">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="historyTableBody" class="divide-y divide-[#E8EAE6] font-mono text-xs">
+        <tr><td colspan="7" class="py-6 text-center text-[#4B524C]">Memuat riwayat pengujian...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Tampilan Mobile (< 768px): Daftar Baris Vertikal Bersih (Zero Kolom Terpotong) -->
+  <div id="historyListMobile" class="block md:hidden divide-y divide-[#E5E7E2] pb-12">
+    <div class="py-6 text-center text-xs text-[#4B524C]">Memuat riwayat pengujian...</div>
+  </div>
+</div>
